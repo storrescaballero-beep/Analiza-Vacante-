@@ -36,6 +36,7 @@ REGLAS DE SALIDA:
 - Todos los textos en español de España.
 - Los salarios en euros brutos anuales.
 - Sé específico con números, nunca vago.
+- CRÍTICO: si un valor string necesita salto de línea (por ejemplo "version_mejorada"), usa el carácter de escape \\n dentro del string. Nunca insertes un salto de línea real sin escapar: rompe el JSON.
 
 ESQUEMA JSON EXACTO:
 {
@@ -122,13 +123,57 @@ function extraerTexto(data) {
     .join("\n");
 }
 
+function sanearControlEnStrings(texto) {
+  // Si el modelo mete un salto de línea/tab literal dentro de un valor string
+  // (p.ej. en la reescritura del CV), JSON.parse falla porque no van escapados.
+  // Recorremos el texto carácter a carácter y escapamos los caracteres de
+  // control SOLO cuando estamos dentro de una cadena JSON.
+  let resultado = "";
+  let dentroString = false;
+  let escapando = false;
+  for (let i = 0; i < texto.length; i++) {
+    const ch = texto[i];
+    const code = texto.charCodeAt(i);
+    if (escapando) {
+      resultado += ch;
+      escapando = false;
+      continue;
+    }
+    if (ch === "\\" && dentroString) {
+      resultado += ch;
+      escapando = true;
+      continue;
+    }
+    if (ch === '"') {
+      dentroString = !dentroString;
+      resultado += ch;
+      continue;
+    }
+    if (dentroString && code < 0x20) {
+      if (ch === "\n") resultado += "\\n";
+      else if (ch === "\r") resultado += "\\r";
+      else if (ch === "\t") resultado += "\\t";
+      else resultado += "\\u" + code.toString(16).padStart(4, "0");
+      continue;
+    }
+    resultado += ch;
+  }
+  return resultado;
+}
+
 function parsearJSON(texto) {
   const limpio = texto.replace(/```json|```/g, "").trim();
   // Busca el primer { y el último } por si el modelo añade algo alrededor
   const inicio = limpio.indexOf("{");
   const fin = limpio.lastIndexOf("}");
   if (inicio === -1 || fin === -1) throw new Error("Sin JSON en la respuesta");
-  return JSON.parse(limpio.slice(inicio, fin + 1));
+  const bruto = limpio.slice(inicio, fin + 1);
+  try {
+    return JSON.parse(bruto);
+  } catch (e) {
+    // Reintento saneando caracteres de control dentro de strings (saltos de línea sin escapar, etc.)
+    return JSON.parse(sanearControlEnStrings(bruto));
+  }
 }
 
 async function enviarLeadWebhook(lead, informe, modeloUsado) {
