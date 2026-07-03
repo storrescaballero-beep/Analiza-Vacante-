@@ -158,7 +158,7 @@ async function enviarLeadWebhook(lead, informe, modeloUsado) {
   }
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   // CORS básico por si sirves el front desde otro dominio
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -223,4 +223,10 @@ module.exports = async (req, res) => {
       error: "No hemos podido generar el informe. Inténtalo de nuevo en unos segundos.",
     });
   }
-};
+}
+
+// Sube el límite de ejecución (por defecto 10s en plan Hobby) para dar
+// margen a la búsqueda web de guías salariales, que puede tardar 15-30s.
+// En plan Hobby el máximo permitido es 60s.
+module.exports = handler;
+module.exports.config = { maxDuration: 60 };
