@@ -13,6 +13,7 @@
 //   LIMITE_DIARIO_EMAIL -> opcional, por defecto 3 (informes máximos por email al día — control fino real)
 //   LIMITE_DIARIO_IP    -> opcional, por defecto 15 (informes máximos por IP al día — más alto para no penalizar oficinas con IP compartida)
 //   DOMINIOS_SIN_LIMITE -> opcional, por defecto "weleapinternational.com" (dominios de email exentos del límite diario, separados por coma)
+//   ADMIN_SECRET        -> contraseña para consultar los leads guardados vía /api/leads (obligatoria si quieres usar ese endpoint)
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "claude-opus-4-8";
@@ -234,6 +235,28 @@ async function enviarLeadWebhook(lead, informe, modeloUsado) {
   }
 }
 
+// Guarda cada lead en Redis (misma base de datos Upstash que el límite diario).
+// Se almacena en una lista ("radar:leads") como JSON, más reciente primero.
+// Consulta los leads guardados vía /api/leads?secret=TU_ADMIN_SECRET
+async function guardarLeadEnRedis(payload) {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) {
+    console.warn("KV no configurado: el lead NO se ha guardado. Configura KV_REST_API_URL/TOKEN.");
+    return;
+  }
+  try {
+    await fetch(`${url}/lpush/radar:leads`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "text/plain" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    // Guardar el lead nunca debe romper la respuesta al usuario
+    console.error("Error guardando lead en Redis:", e.message);
+  }
+}
+
 // ---- Límite diario (3 informes/día por email o por IP) vía Vercel KV ----
 // Usa la API REST de Vercel KV directamente con fetch, sin dependencias npm.
 // Si no hay KV configurado, no limita (para no romper la app si aún no lo has montado),
@@ -373,20 +396,32 @@ async function handler(req, res) {
 
     const informe = parsearJSON(extraerTexto(data));
 
-    // Enviar lead a n8n (no bloqueante para el usuario)
-    await enviarLeadWebhook(
-      {
-        nombre: d.nombre,
-        email: d.email,
-        empresa: d.empresa,
-        puesto: d.puesto,
-        sector: d.sector,
-        ubicacion: d.ubicacion,
-        salario: d.salario || null,
+    const leadInfo = {
+      nombre: d.nombre,
+      email: d.email,
+      empresa: d.empresa,
+      puesto: d.puesto,
+      sector: d.sector,
+      ubicacion: d.ubicacion,
+      salario: d.salario || null,
+    };
+
+    // Guardar el lead en Redis (siempre) y, si está configurado, mandarlo también a n8n.
+    // Ninguno de los dos bloquea ni rompe la respuesta al usuario si falla.
+    await guardarLeadEnRedis({
+      origen: "radar-vacante",
+      timestamp: new Date().toISOString(),
+      lead: leadInfo,
+      vacante: {
+        puesto: leadInfo.puesto,
+        sector: leadInfo.sector,
+        ubicacion: leadInfo.ubicacion,
+        salario: leadInfo.salario,
       },
       informe,
-      modeloUsado
-    );
+      modelo: modeloUsado,
+    });
+    await enviarLeadWebhook(leadInfo, informe, modeloUsado);
 
     return res.status(200).json({ informe, modelo: modeloUsado });
   } catch (e) {
