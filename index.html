@@ -315,7 +315,7 @@
           </div>
 
           <div class="form-error" id="form-error"></div>
-          <p class="form-note">Sin spam. Usamos tu email para enviarte el informe y, si nos dejas, alguna lectura de mercado que merezca la pena.</p>
+          <p class="form-note">Sin spam. Tu email nos sirve para verificar que eres un profesional de RRHH y, si nos dejas, contarte alguna lectura de mercado que merezca la pena. El informe lo tienes al instante en pantalla y puedes descargarlo en PDF.</p>
           <div class="form-submit"><button class="btn" type="submit" id="btn-enviar">Generar informe de radar</button></div>
         </div>
       </form>
@@ -460,8 +460,11 @@ const MENSAJES_CARGA = [
 ];
 
 // ---- envío ----
+let enviandoInforme = false;
+
 $('form-radar').addEventListener('submit', async e => {
   e.preventDefault();
+  if (enviandoInforme) return; // evita doble envío por doble clic/tap
   const err = $('form-error');
   err.style.display = 'none';
 
@@ -484,6 +487,11 @@ $('form-radar').addEventListener('submit', async e => {
     err.textContent = 'Necesitamos tu email corporativo: el radar está pensado para equipos de talento y dirección, no para curiosos con Gmail.';
     err.style.display = 'block'; return;
   }
+
+  enviandoInforme = true;
+  $('btn-enviar').disabled = true;
+  $('btn-enviar').style.opacity = '0.6';
+  $('btn-enviar').style.cursor = 'wait';
 
   // loading
   $('form-radar').style.display = 'none';
@@ -508,6 +516,10 @@ $('form-radar').addEventListener('submit', async e => {
   } finally {
     clearInterval(ticker);
     $('cargando').style.display = 'none';
+    enviandoInforme = false;
+    $('btn-enviar').disabled = false;
+    $('btn-enviar').style.opacity = '';
+    $('btn-enviar').style.cursor = '';
   }
 });
 
