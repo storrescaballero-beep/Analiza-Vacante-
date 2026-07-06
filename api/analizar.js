@@ -10,11 +10,13 @@
 //   MAX_TOKENS          -> opcional, por defecto 4000 (subido porque la búsqueda web consume turnos extra)
 //   KV_REST_API_URL     -> URL de Vercel KV (Storage → Create Database → KV). Necesaria para el límite de 3 informes/día.
 //   KV_REST_API_TOKEN   -> Token de Vercel KV. Si no está configurado, el límite queda desactivado (no rompe la app, pero no protege el gasto).
-//   LIMITE_DIARIO       -> opcional, por defecto 3 (informes máximos por email o IP al día)
+//   LIMITE_DIARIO_EMAIL -> opcional, por defecto 3 (informes máximos por email al día — control fino real)
+//   LIMITE_DIARIO_IP    -> opcional, por defecto 15 (informes máximos por IP al día — más alto para no penalizar oficinas con IP compartida)
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "claude-opus-4-8";
-const LIMITE_DIARIO = Number(process.env.LIMITE_DIARIO) || 3;
+const LIMITE_DIARIO_EMAIL = Number(process.env.LIMITE_DIARIO_EMAIL) || 3;
+const LIMITE_DIARIO_IP = Number(process.env.LIMITE_DIARIO_IP) || 15;
 
 // Placements reales de weleap, como referencia de verdad para el modelo.
 // Añade aquí cierres reales (sector, puesto, ciudad, salario final, semanas hasta el cierre).
@@ -229,7 +231,7 @@ async function enviarLeadWebhook(lead, informe, modeloUsado) {
 // Usa la API REST de Vercel KV directamente con fetch, sin dependencias npm.
 // Si no hay KV configurado, no limita (para no romper la app si aún no lo has montado),
 // pero deja aviso en logs — recuerda configurarlo antes de publicar en LinkedIn.
-async function incrementarYComprobar(clave, ttlSegundos) {
+async function incrementarYComprobar(clave, ttlSegundos, tope) {
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token) {
@@ -248,7 +250,7 @@ async function incrementarYComprobar(clave, ttlSegundos) {
         headers: { Authorization: `Bearer ${token}` },
       });
     }
-    return { limitado: contador > LIMITE_DIARIO, contador, kvActivo: true };
+    return { limitado: contador > tope, contador, kvActivo: true };
   } catch (e) {
     console.error("Error consultando KV, dejando pasar la petición:", e.message);
     return { limitado: false, contador: 0, kvActivo: false };
@@ -315,19 +317,25 @@ async function handler(req, res) {
       return res.status(400).json({ error: "El email no es válido." });
     }
 
-    // Límite diario: máximo LIMITE_DIARIO informes por email y por IP en 24h.
+    // Límite diario: email tiene un tope estricto (LIMITE_DIARIO_EMAIL), la IP uno
+    // más permisivo (LIMITE_DIARIO_IP) para no penalizar oficinas con IP compartida.
     // Se comprueba ANTES de llamar a Claude para no gastar si ya está agotado.
     const hoy = new Date().toISOString().slice(0, 10);
     const ip = obtenerIP(req);
     const claveEmail = `radar:limite:email:${String(d.email).trim().toLowerCase()}:${hoy}`;
     const claveIp = `radar:limite:ip:${ip}:${hoy}`;
     const [limiteEmail, limiteIp] = await Promise.all([
-      incrementarYComprobar(claveEmail, 86400),
-      incrementarYComprobar(claveIp, 86400),
+      incrementarYComprobar(claveEmail, 86400, LIMITE_DIARIO_EMAIL),
+      incrementarYComprobar(claveIp, 86400, LIMITE_DIARIO_IP),
     ]);
-    if (limiteEmail.limitado || limiteIp.limitado) {
+    if (limiteEmail.limitado) {
       return res.status(429).json({
-        error: `Has alcanzado el límite de ${LIMITE_DIARIO} informes gratuitos hoy. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
+        error: `Ya has generado ${LIMITE_DIARIO_EMAIL} informes hoy con este email. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
+      });
+    }
+    if (limiteIp.limitado) {
+      return res.status(429).json({
+        error: `Se ha alcanzado el límite de informes gratuitos hoy desde esta red. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
       });
     }
 
