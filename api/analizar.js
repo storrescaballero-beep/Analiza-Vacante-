@@ -60,6 +60,7 @@ REGLAS DE SALIDA:
 - Los salarios en euros brutos anuales.
 - Sé específico con números, nunca vago.
 - CRÍTICO: si un valor string necesita salto de línea (por ejemplo "version_mejorada"), usa el carácter de escape \\n dentro del string. Nunca insertes un salto de línea real sin escapar: rompe el JSON.
+- CRÍTICO: si necesitas citar una palabra o frase dentro de un valor string, usa comillas simples ('así'), nunca comillas dobles. Una comilla doble sin escapar dentro de un string rompe el JSON.
 
 ESQUEMA JSON EXACTO:
 {
@@ -155,17 +156,18 @@ function extraerTexto(data) {
     .join("\n");
 }
 
-function sanearControlEnStrings(texto) {
-  // Si el modelo mete un salto de línea/tab literal dentro de un valor string
-  // (p.ej. en la reescritura del CV), JSON.parse falla porque no van escapados.
-  // Recorremos el texto carácter a carácter y escapamos los caracteres de
-  // control SOLO cuando estamos dentro de una cadena JSON.
+function repararJSON(texto) {
+  // El modelo a veces mete un salto de línea/tab sin escapar, o cita una palabra
+  // entre comillas dobles dentro de un valor string (rompiendo el JSON en ambos casos).
+  // Recorremos el texto carácter a carácter arreglando ambos problemas SOLO dentro
+  // de cadenas, sin tocar nada que ya sea JSON válido.
   let resultado = "";
   let dentroString = false;
   let escapando = false;
   for (let i = 0; i < texto.length; i++) {
     const ch = texto[i];
     const code = texto.charCodeAt(i);
+
     if (escapando) {
       resultado += ch;
       escapando = false;
@@ -177,8 +179,22 @@ function sanearControlEnStrings(texto) {
       continue;
     }
     if (ch === '"') {
-      dentroString = !dentroString;
-      resultado += ch;
+      if (!dentroString) {
+        dentroString = true;
+        resultado += ch;
+        continue;
+      }
+      // Dentro de un string: ¿es el cierre legítimo o una comilla suelta en el texto?
+      let j = i + 1;
+      while (j < texto.length && /\s/.test(texto[j])) j++;
+      const siguiente = texto[j];
+      const pareceCierre = siguiente === undefined || [",", "}", "]", ":"].includes(siguiente);
+      if (pareceCierre) {
+        dentroString = false;
+        resultado += ch;
+      } else {
+        resultado += '\\"'; // comilla suelta dentro del texto: la escapamos
+      }
       continue;
     }
     if (dentroString && code < 0x20) {
@@ -203,8 +219,8 @@ function parsearJSON(texto) {
   try {
     return JSON.parse(bruto);
   } catch (e) {
-    // Reintento saneando caracteres de control dentro de strings (saltos de línea sin escapar, etc.)
-    return JSON.parse(sanearControlEnStrings(bruto));
+    // Reintento reparando comillas sueltas y saltos de línea sin escapar
+    return JSON.parse(repararJSON(bruto));
   }
 }
 
