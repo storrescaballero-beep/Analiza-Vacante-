@@ -3,43 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radar de Vacante — weleap | ¿Existe el candidato que buscas?</title>
-<meta name="description" content="Escanea tu vacante en 30 segundos: benchmark salarial real, tiempo de cobertura, escasez de talento y diagnóstico de tu job description. Gratis, por weleap.">
+<title>Radar de Vacante — Weleap | ¿Existe el candidato que buscas?</title>
+<meta name="description" content="Escanea tu vacante en 30 segundos: benchmark salarial real, tiempo de cobertura, escasez de talento y diagnóstico de tu job description. Gratis, por Weleap.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0D1B22;
-    --ink-2:#13272F;
-    --ink-3:#1C3640;
-    --paper:#F1F3F2;
+    --ink:#130030;
+    --ink-2:#1D0347;
+    --ink-3:#2B0A5E;
+    --paper:#F3F1F7;
     --panel:#FFFFFF;
-    --line:#D8DEDC;
-    --muted:#5E7078;
-    --muted-dark:#8FA6AD;
-    --accent:#FFB020;
-    --accent-ink:#231A00;
+    --line:#DCD6E8;
+    --muted:#5C5470;
+    --muted-dark:#A99DC2;
+    --accent:#FF0068;
+    --accent-ink:#FFFFFF;
     --ok:#2FBF71;
     --warn:#FFB020;
-    --bad:#FF4D3D;
+    --bad:#E63950;
     --radius:10px;
-    --display:'Archivo',sans-serif;
-    --body:'IBM Plex Sans',sans-serif;
-    --mono:'IBM Plex Mono',monospace;
+    --display:'Montserrat',sans-serif;
+    --body:'Montserrat',sans-serif;
+    --mono:'Montserrat',sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.65;font-size:17px}
-  ::selection{background:var(--accent);color:var(--accent-ink)}
+  ::selection{background:var(--accent);color:#fff}
 
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  .mono{font-family:var(--mono)}
+  .mono{font-family:var(--mono);letter-spacing:.06em}
 
   /* ===== NAV ===== */
-  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(13,27,34,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(19,0,48,.9);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
   nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
-  .logo{font-family:var(--display);font-weight:800;font-size:20px;color:#fff;letter-spacing:-.02em;text-decoration:none}
+  .logo{font-family:var(--display);font-weight:800;font-size:21px;color:#fff;letter-spacing:-.01em;text-decoration:none}
   .logo span{color:var(--accent)}
   .nav-cta{font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent-ink);background:var(--accent);padding:9px 18px;border-radius:6px;text-decoration:none;transition:transform .15s ease}
   .nav-cta:hover{transform:scale(1.04)}
@@ -216,7 +216,7 @@
 <!-- SECTION: nav -->
 <nav>
   <div class="wrap">
-    <a class="logo" href="#top">we<span>leap</span> <span style="color:var(--muted-dark);font-weight:500;font-size:14px">/ radar de vacante</span></a>
+    <a class="logo" href="#top">we<span>leap</span></a>
     <a class="nav-cta" href="#escanear">Escanear mi vacante</a>
   </div>
 </nav>
@@ -229,11 +229,11 @@
     <div class="blip b1"></div><div class="blip b2"></div><div class="blip b3"></div>
   </div>
   <div class="wrap hero-content">
-    <div class="eyebrow">Herramienta gratuita · weleap executive search</div>
+    <div class="eyebrow">Herramienta gratuita · weleapHUNT executive search</div>
     <h1>Antes de publicar esa vacante, entérate de si <em>el candidato existe</em>.</h1>
     <p class="hero-sub">Pega tu vacante y en 30 segundos recibes lo que un headhunter tarda una semana en decirte: benchmark salarial real, tiempo de cobertura, escasez del perfil y un diagnóstico sin anestesia de tu job description.</p>
     <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
-    <p class="hero-proof">Análisis con IA de última generación + criterio de <strong>20 años cazando directivos</strong> en logística, ingeniería, energía, farma y data centers.</p>
+    <p class="hero-proof">Análisis con IA de última generación + criterio de <strong>weleapHUNT</strong>: más de 25 años de experiencia, presencia en 8 países, 100+ búsquedas ejecutivas entregadas.</p>
   </div>
 </header>
 
@@ -277,7 +277,7 @@
     <div class="form-panel" id="panel-form">
       <form id="form-radar" novalidate>
         <div class="form-grid">
-          <div class="field"><label for="puesto">Puesto <b>*</b></label><input id="puesto" name="puesto" required placeholder="Ej. Director de Operaciones Logísticas"></div>
+          <div class="field"><label for="puesto">Puesto <b>*</b></label><input id="puesto" name="puesto" required maxlength="150" placeholder="Ej. Director de Operaciones Logísticas"></div>
           <div class="field"><label for="sector">Sector <b>*</b></label>
             <select id="sector" name="sector" required>
               <option value="">Selecciona…</option>
@@ -290,8 +290,8 @@
               <option>Otro</option>
             </select>
           </div>
-          <div class="field"><label for="ubicacion">Ubicación <b>*</b></label><input id="ubicacion" name="ubicacion" required placeholder="Ej. Madrid, Asturias, remoto…"></div>
-          <div class="field"><label for="salario">Salario ofrecido (bruto anual)</label><input id="salario" name="salario" placeholder="Ej. 65.000 - 75.000 €"></div>
+          <div class="field"><label for="ubicacion">Ubicación <b>*</b></label><input id="ubicacion" name="ubicacion" required maxlength="100" placeholder="Ej. Madrid, Asturias, remoto…"></div>
+          <div class="field"><label for="salario">Salario ofrecido (bruto anual)</label><input id="salario" name="salario" maxlength="60" placeholder="Ej. 65.000 - 75.000 €"></div>
           <div class="field"><label for="modalidad">Modalidad</label>
             <select id="modalidad" name="modalidad">
               <option value="">Selecciona…</option>
@@ -300,13 +300,19 @@
               <option>Remoto</option>
             </select>
           </div>
-          <div class="field"><label for="empresa">Empresa <b>*</b></label><input id="empresa" name="empresa" required placeholder="Nombre de tu empresa"></div>
-          <div class="field full"><label for="jd">Descripción de la vacante (pega tu JD)</label><textarea id="jd" name="jd" placeholder="Opcional pero recomendado: pega aquí la descripción completa para el diagnóstico y la reescritura skills-based."></textarea></div>
+          <div class="field"><label for="empresa">Empresa <b>*</b></label><input id="empresa" name="empresa" required maxlength="120" placeholder="Nombre de tu empresa"></div>
+          <div class="field full"><label for="jd">Descripción de la vacante (pega tu JD)</label><textarea id="jd" name="jd" maxlength="15000" placeholder="Opcional pero recomendado: pega aquí la descripción completa para el diagnóstico y la reescritura skills-based."></textarea></div>
 
           <div class="form-divider">¿Dónde te enviamos el radar completo?</div>
 
-          <div class="field"><label for="nombre">Nombre <b>*</b></label><input id="nombre" name="nombre" required placeholder="Tu nombre"></div>
-          <div class="field"><label for="email">Email corporativo <b>*</b></label><input id="email" name="email" type="email" required placeholder="tu@empresa.com"></div>
+          <div class="field"><label for="nombre">Nombre <b>*</b></label><input id="nombre" name="nombre" required maxlength="100" placeholder="Tu nombre"></div>
+          <div class="field"><label for="email">Email corporativo <b>*</b></label><input id="email" name="email" type="email" required maxlength="150" placeholder="tu@empresa.com"></div>
+
+          <!-- Honeypot anti-bots: invisible para personas, atractivo para bots automáticos. No eliminar. -->
+          <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+            <label for="web_empresa">No rellenar este campo</label>
+            <input id="web_empresa" name="web_empresa" type="text" tabindex="-1" autocomplete="off">
+          </div>
 
           <div class="form-error" id="form-error"></div>
           <p class="form-note">Sin spam. Usamos tu email para enviarte el informe y, si nos dejas, alguna lectura de mercado que merezca la pena.</p>
@@ -354,7 +360,7 @@
             <svg class="gauge" viewBox="0 0 100 58" aria-hidden="true">
               <path d="M8 52 A44 44 0 0 1 92 52" fill="none" stroke="#1C3640" stroke-width="9" stroke-linecap="round"/>
               <path id="gauge-arc" d="M8 52 A44 44 0 0 1 92 52" fill="none" stroke="#FFB020" stroke-width="9" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138"/>
-              <text id="gauge-num" x="50" y="50" text-anchor="middle" font-family="Archivo" font-weight="800" font-size="22" fill="#fff">0</text>
+              <text id="gauge-num" x="50" y="50" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="22" fill="#fff">0</text>
             </svg>
             <div class="gauge-info">
               <div class="nivel" id="esc-nivel"></div>
@@ -389,7 +395,7 @@
       <div class="informe-cta">
         <h3 id="cta-titulo">¿Quieres que lo encontremos nosotros?</h3>
         <p>Este radar es lo que hacemos antes de aceptar cualquier búsqueda. Si el perfil es de los difíciles, mejor hablarlo con quien vive de encontrarlos.</p>
-        <a class="btn-dark" href="mailto:hola@weleap.es?subject=Radar%20de%20Vacante%20—%20quiero%20hablar" id="cta-link">Hablar con weleap</a>
+        <a class="btn-dark" href="mailto:sergio@weleapinternational.com?subject=Radar%20de%20Vacante%20—%20quiero%20hablar" id="cta-link">Hablar con weleap</a>
       </div>
       <p class="disclaimer">Estimaciones generadas con IA a partir de conocimiento de mercado. Para datos verificados de candidatos reales, eso ya es trabajo de weleap.</p>
     </div>
@@ -421,8 +427,8 @@
 <!-- SECTION: footer -->
 <footer>
   <div class="wrap">
-    <span>© 2026 weleap · Executive search sin anestesia</span>
-    <span><a href="https://weleap.es">weleap.es</a> · <a href="https://insider.weleap.es">INSIDER</a></span>
+    <span>© 2026 weleap · weleapHUNT executive search</span>
+    <span><a href="https://weleapinternational.com">weleapinternational.com</a> · <a href="mailto:sergio@weleapinternational.com">sergio@weleapinternational.com</a></span>
   </div>
 </footer>
 
@@ -451,8 +457,14 @@ $('form-radar').addEventListener('submit', async e => {
   const err = $('form-error');
   err.style.display = 'none';
 
+  // Honeypot: si un bot rellenó el campo invisible, abortamos sin gastar llamada a la API
+  if ($('web_empresa').value.trim() !== '') {
+    return;
+  }
+
   const datos = {};
   ['puesto','sector','ubicacion','salario','modalidad','empresa','jd','nombre','email'].forEach(k => datos[k] = $(k).value.trim());
+  datos.web_empresa = $('web_empresa').value; // se envía vacío; el backend también lo valida
 
   // validación
   for (const k of ['puesto','sector','ubicacion','empresa','nombre','email']) {
@@ -564,7 +576,7 @@ function renderInforme(inf, datos) {
   $('jd-mejorado').textContent = j.version_mejorada || '';
 
   // CTA personalizado
-  $('cta-link').href = `mailto:hola@weleap.es?subject=${encodeURIComponent('Radar de Vacante — '+datos.puesto)}&body=${encodeURIComponent('Hola weleap,\n\nAcabo de escanear la vacante "'+datos.puesto+'" ('+datos.ubicacion+') y quiero hablar sobre la búsqueda.\n\n'+datos.nombre+' — '+datos.empresa)}`;
+  $('cta-link').href = `mailto:sergio@weleapinternational.com?subject=${encodeURIComponent('Radar de Vacante — '+datos.puesto)}&body=${encodeURIComponent('Hola weleap,\n\nAcabo de escanear la vacante "'+datos.puesto+'" ('+datos.ubicacion+') y quiero hablar sobre la búsqueda.\n\n'+datos.nombre+' — '+datos.empresa)}`;
 
   $('informe').style.display = 'block';
   $('informe').scrollIntoView({behavior:'smooth', block:'start'});
