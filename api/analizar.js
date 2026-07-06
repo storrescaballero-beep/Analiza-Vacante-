@@ -1,28 +1,41 @@
 // /api/analizar.js — Radar de Vacante (weleap)
-// Función serverless para Vercel. Node 18+, sin dependencias.
+// Función serverless para Vercel. Node 18+, sin dependencias externas (usa fetch nativo).
 //
 // Variables de entorno necesarias en Vercel:
 //   ANTHROPIC_API_KEY   -> tu API key de Anthropic (obligatoria)
-//   CLAUDE_MODEL        -> opcional, por defecto "claude-fable-5"
+//   CLAUDE_MODEL        -> opcional, por defecto "claude-sonnet-5"
 //   FALLBACK_MODEL      -> opcional, por defecto "claude-opus-4-8"
 //   LEADS_WEBHOOK_URL   -> opcional, webhook de n8n para recibir cada lead + informe
 //   ENABLE_WEB_SEARCH   -> opcional, "false" para desactivar la búsqueda de guías salariales (activa por defecto, es la base del benchmark real)
 //   MAX_TOKENS          -> opcional, por defecto 4000 (subido porque la búsqueda web consume turnos extra)
+//   KV_REST_API_URL     -> URL de Vercel KV (Storage → Create Database → KV). Necesaria para el límite de 3 informes/día.
+//   KV_REST_API_TOKEN   -> Token de Vercel KV. Si no está configurado, el límite queda desactivado (no rompe la app, pero no protege el gasto).
+//   LIMITE_DIARIO       -> opcional, por defecto 3 (informes máximos por email o IP al día)
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "claude-opus-4-8";
+const LIMITE_DIARIO = Number(process.env.LIMITE_DIARIO) || 3;
 
-const SYSTEM_PROMPT = `Eres el motor de análisis de "Radar de Vacante", una herramienta de weleap, firma boutique de executive search en España especializada en logística, ingeniería, energía, farma y data centers.
+// Placements reales de weleap, como referencia de verdad para el modelo.
+// Añade aquí cierres reales (sector, puesto, ciudad, salario final, semanas hasta el cierre).
+// Cuantos más metas, más preciso será el benchmark — esto pesa más que cualquier guía pública
+// porque es tu propio histórico verificado, no una estimación de mercado.
+const WELEAP_PLACEMENTS = [
+  // { puesto: "Director de Operaciones Logísticas", sector: "Logística y transporte", ubicacion: "Madrid", salario: 78000, semanas_cierre: 9 },
+];
 
-Tu trabajo: analizar una vacante como lo haría un headhunter senior con 20 años de mercado español, y devolver un informe honesto, directo y con criterio. El tono de weleap es provocador y sin lenguaje corporativo vacío: di las cosas claras, con datos y sin edulcorar, pero siempre profesional y útil.
+const SYSTEM_PROMPT = `Eres el motor de análisis de "Radar de Vacante", una herramienta de weleapHUNT, la línea de executive search de weleap, consultora boutique de HR con operación en 8 países. weleap conecta directivos y expertos en HR con su próximo desafío profesional, priorizando el encaje real con la organización sobre el ajuste técnico superficial.
+
+Tu trabajo: analizar una vacante como lo haría un headhunter senior, y devolver un informe honesto, directo y con criterio. El tono de weleap es senior y directo, sin capas corporativas innecesarias entre el problema y la solución: di las cosas claras, con datos y sin edulcorar, pero siempre profesional y útil.
 
 Tienes acceso a búsqueda web. ÚSALA SIEMPRE para el benchmark salarial, en este orden:
-1. Busca el dato en al menos 3 de estas fuentes públicas (ajusta los términos de búsqueda al puesto, sector y España): "Hays Guía del Mercado Laboral España", "Michael Page Estudio de Remuneración España", "Robert Half Salary Guide España", "Randstad informe salarial España", "Adecco Guía Salarial España", "PageGroup salary guide Spain".
+0. Si en el mensaje del usuario aparece la sección "PLACEMENTS REALES DE WELEAP", esos datos son verdad verificada de cierres propios — dales prioridad máxima como ancla del rango sobre cualquier guía pública, y dilo explícitamente en el comentario (ej. "basado en nuestros propios cierres recientes en este sector").
+1. Además, busca el dato en al menos 3 de estas fuentes públicas (ajusta los términos de búsqueda al puesto, sector y España): "INE Encuesta de Estructura Salarial", "Hays Guía del Mercado Laboral España", "Michael Page Estudio de Remuneración España", "Robert Half Salary Guide España", "Randstad informe salarial España", "Adecco Guía Salarial España", "PageGroup salary guide Spain". El INE es la fuente pública oficial más fiable de España: úsala siempre que exista dato para ese sector/puesto y dale prioridad como ancla del rango cuando no haya placements propios de weleap.
 2. Extrae el rango salarial que cada fuente da para el puesto (o el más cercano equivalente por seniority y función si no hay coincidencia exacta).
-3. Calcula una MEDIA PONDERADA de los rangos encontrados, dando más peso a las fuentes con datos más específicos para ese sector/puesto y descartando outliers claramente desalineados.
+3. Calcula una MEDIA PONDERADA de los rangos encontrados: si hay placements propios de weleap, pesan más que cualquier fuente pública; entre las públicas, da más peso a las más específicas para ese sector/puesto y descarta outliers claramente desalineados.
 4. Si una fuente no cubre el sector o el puesto es muy nicho, indícalo y extrapola desde el perfil de seniority/función más cercano, dejándolo claro en el comentario.
 5. Nunca reproduzcas texto literal de las guías: sintetiza solo las cifras y tu propia interpretación.
-6. Registra en "fuentes_consultadas" qué guías lograste consultar realmente (no las que ibas a consultar).
+6. Registra en "fuentes_consultadas" qué guías lograste consultar realmente (no las que ibas a consultar), y si usaste placements propios de weleap, inclúyelo como "Histórico de cierres weleap" en esa misma lista.
 
 Analiza teniendo en cuenta:
 1. BENCHMARK SALARIAL: rango de mercado en España para ese puesto, sector y ubicación (ajusta por ciudad: Madrid/Barcelona vs resto), calculado como media ponderada de las guías salariales públicas que hayas consultado por búsqueda web. Si el salario ofrecido está por debajo de mercado, dilo sin rodeos.
@@ -74,6 +87,15 @@ ESQUEMA JSON EXACTO:
 }`;
 
 function construirPromptUsuario(datos) {
+  const relevantes = WELEAP_PLACEMENTS.filter(
+    (p) => p.sector === datos.sector || (datos.puesto && p.puesto.toLowerCase().includes(String(datos.puesto).toLowerCase().split(" ")[0]))
+  );
+  const bloquePlacements = relevantes.length
+    ? `\n\nPLACEMENTS REALES DE WELEAP (verdad verificada, úsalos como ancla prioritaria):\n${relevantes
+        .map((p) => `- ${p.puesto} · ${p.sector} · ${p.ubicacion} · ${p.salario}€ brutos/año · cerrado en ${p.semanas_cierre} semanas`)
+        .join("\n")}`
+    : "";
+
   return `Analiza esta vacante para el mercado español:
 
 PUESTO: ${datos.puesto}
@@ -83,7 +105,7 @@ SALARIO OFRECIDO: ${datos.salario || "No indicado"}
 MODALIDAD: ${datos.modalidad || "No indicada"}
 
 DESCRIPCIÓN DE LA VACANTE (JD):
-${datos.jd ? datos.jd : "[No aportada — evalúa con los datos disponibles y márcalo en jd_aportado: false]"}
+${datos.jd ? datos.jd : "[No aportada — evalúa con los datos disponibles y márcalo en jd_aportado: false]"}${bloquePlacements}
 
 Devuelve el informe JSON.`;
 }
@@ -203,26 +225,110 @@ async function enviarLeadWebhook(lead, informe, modeloUsado) {
   }
 }
 
+// ---- Límite diario (3 informes/día por email o por IP) vía Vercel KV ----
+// Usa la API REST de Vercel KV directamente con fetch, sin dependencias npm.
+// Si no hay KV configurado, no limita (para no romper la app si aún no lo has montado),
+// pero deja aviso en logs — recuerda configurarlo antes de publicar en LinkedIn.
+async function incrementarYComprobar(clave, ttlSegundos) {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) {
+    console.warn("KV no configurado: el límite diario está DESACTIVADO. Configura KV_REST_API_URL/TOKEN antes de publicar.");
+    return { limitado: false, contador: 0, kvActivo: false };
+  }
+  try {
+    const incrResp = await fetch(`${url}/incr/${encodeURIComponent(clave)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const incrData = await incrResp.json();
+    const contador = Number(incrData.result) || 0;
+    if (contador === 1) {
+      // primera vez que se usa esta clave hoy: fija la expiración a 24h
+      await fetch(`${url}/expire/${encodeURIComponent(clave)}/${ttlSegundos}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+    return { limitado: contador > LIMITE_DIARIO, contador, kvActivo: true };
+  } catch (e) {
+    console.error("Error consultando KV, dejando pasar la petición:", e.message);
+    return { limitado: false, contador: 0, kvActivo: false };
+  }
+}
+
+function obtenerIP(req) {
+  const fwd = req.headers["x-forwarded-for"];
+  if (fwd) return String(fwd).split(",")[0].trim();
+  return req.socket?.remoteAddress || "desconocida";
+}
+
+// Dominios desde los que se permite llamar a esta función.
+// Al publicarse en LinkedIn como lead magnet público, restringimos el origen
+// para que la API no pueda ser invocada masivamente desde cualquier web.
+const ORIGENES_PERMITIDOS = [
+  "https://weleapinternational.com",
+  "https://www.weleapinternational.com",
+  "https://analiza-vacante.vercel.app",
+];
+
 async function handler(req, res) {
-  // CORS básico por si sirves el front desde otro dominio
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origen = req.headers.origin || "";
+  if (ORIGENES_PERMITIDOS.includes(origen)) {
+    res.setHeader("Access-Control-Allow-Origin", origen);
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Vary", "Origin");
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
   try {
     const d = req.body || {};
 
-    // Validación mínima
+    // Honeypot: si el campo trampa viene relleno, es un bot. Respondemos
+    // 200 con éxito falso para no darle pistas de que fue detectado, pero
+    // no llamamos a la API (nos ahorramos el coste y el abuso).
+    if (d.web_empresa && String(d.web_empresa).trim() !== "") {
+      return res.status(200).json({
+        informe: {
+          veredicto: { titular: "Recibido", texto: "", nivel: "verde" },
+          benchmark_salarial: {}, tiempo_cobertura: {}, escasez_talento: {},
+          diagnostico_jd: {}, recomendaciones: [],
+        },
+        modelo: "n/a",
+      });
+    }
+
+    // Validación mínima + límites de longitud (evita payloads abusivos)
     const obligatorios = ["puesto", "sector", "ubicacion", "nombre", "email", "empresa"];
     for (const campo of obligatorios) {
       if (!d[campo] || String(d[campo]).trim() === "") {
         return res.status(400).json({ error: `Falta el campo: ${campo}` });
       }
     }
-    if (String(d.jd || "").length > 15000) {
-      return res.status(400).json({ error: "La descripción es demasiado larga (máx. 15.000 caracteres)" });
+    const limites = { puesto: 150, sector: 80, ubicacion: 100, salario: 60, modalidad: 40, empresa: 120, nombre: 100, email: 150, jd: 15000 };
+    for (const [campo, max] of Object.entries(limites)) {
+      if (String(d[campo] || "").length > max) {
+        return res.status(400).json({ error: `El campo ${campo} supera el límite permitido.` });
+      }
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(d.email).trim())) {
+      return res.status(400).json({ error: "El email no es válido." });
+    }
+
+    // Límite diario: máximo LIMITE_DIARIO informes por email y por IP en 24h.
+    // Se comprueba ANTES de llamar a Claude para no gastar si ya está agotado.
+    const hoy = new Date().toISOString().slice(0, 10);
+    const ip = obtenerIP(req);
+    const claveEmail = `radar:limite:email:${String(d.email).trim().toLowerCase()}:${hoy}`;
+    const claveIp = `radar:limite:ip:${ip}:${hoy}`;
+    const [limiteEmail, limiteIp] = await Promise.all([
+      incrementarYComprobar(claveEmail, 86400),
+      incrementarYComprobar(claveIp, 86400),
+    ]);
+    if (limiteEmail.limitado || limiteIp.limitado) {
+      return res.status(429).json({
+        error: `Has alcanzado el límite de ${LIMITE_DIARIO} informes gratuitos hoy. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
+      });
     }
 
     const mensajes = [{ role: "user", content: construirPromptUsuario(d) }];
