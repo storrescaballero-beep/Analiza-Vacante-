@@ -398,6 +398,10 @@
         <a class="btn-dark" href="mailto:sergio@weleapinternational.com?subject=Radar%20de%20Vacante%20—%20quiero%20hablar" id="cta-link">Hablar con weleap</a>
       </div>
       <p class="disclaimer">Estimaciones generadas con IA a partir de conocimiento de mercado. Para datos verificados de candidatos reales, eso ya es trabajo de weleap.</p>
+      <div style="text-align:center;margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" type="button" id="btn-otra-vacante" style="background:transparent;border:2px solid var(--accent);color:var(--accent)">Analizar otra vacante</button>
+        <button class="btn" type="button" id="btn-descargar-pdf">Descargar informe en PDF</button>
+      </div>
     </div>
   </div>
 </section>
@@ -432,7 +436,11 @@
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+let ultimoInforme = null;
+let ultimosDatos = null;
+
 // ---- animación fade on scroll ----
 const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('vis')), {threshold:.15});
 document.querySelectorAll('.fade').forEach(el => io.observe(el));
@@ -505,6 +513,8 @@ $('form-radar').addEventListener('submit', async e => {
 
 // ---- render del informe ----
 function renderInforme(inf, datos) {
+  ultimoInforme = inf;
+  ultimosDatos = datos;
   $('inf-meta').textContent = `RADAR // ${datos.puesto.toUpperCase()} · ${datos.ubicacion.toUpperCase()}`;
   $('inf-fecha').textContent = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
 
@@ -583,6 +593,154 @@ function renderInforme(inf, datos) {
 }
 
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- botón "Analizar otra vacante" ----
+$('btn-otra-vacante').addEventListener('click', () => {
+  $('informe').style.display = 'none';
+  $('form-radar').reset();
+  $('form-radar').style.display = 'block';
+  $('form-error').style.display = 'none';
+  document.getElementById('escanear').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+// ---- botón "Descargar informe en PDF" ----
+$('btn-descargar-pdf').addEventListener('click', () => {
+  if (!ultimoInforme || !ultimosDatos) return;
+  generarPDF(ultimoInforme, ultimosDatos);
+});
+
+function generarPDF(inf, datos) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const PAGE_W = 210;
+  const MARGIN = 18;
+  const COL_W = PAGE_W - MARGIN * 2;
+  const INK = [19, 0, 48];      // #130030
+  const ACCENT = [255, 0, 104]; // #FF0068
+  const GRIS = [92, 84, 112];
+  let y = 0;
+
+  const salto = (alturaNecesaria) => {
+    if (y + alturaNecesaria > 285) { doc.addPage(); cabeceraPagina(); }
+  };
+  const cabeceraPagina = () => {
+    doc.setFillColor(...INK);
+    doc.rect(0, 0, PAGE_W, 16, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('weleap', MARGIN, 10.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.setTextColor(220,214,232);
+    doc.text('Radar de Vacante', PAGE_W - MARGIN, 10.5, { align: 'right' });
+    y = 26;
+  };
+  const titulo = (texto) => {
+    salto(14);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.setTextColor(...INK);
+    doc.text(texto.toUpperCase(), MARGIN, y);
+    doc.setDrawColor(...ACCENT); doc.setLineWidth(0.6);
+    doc.line(MARGIN, y+1.5, MARGIN+10, y+1.5);
+    y += 8;
+  };
+  const parrafo = (texto, opts={}) => {
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    doc.setFontSize(opts.size || 10);
+    doc.setTextColor(...(opts.color || GRIS));
+    const lineas = doc.splitTextToSize(String(texto || ''), COL_W);
+    salto(lineas.length * 5 + 2);
+    doc.text(lineas, MARGIN, y);
+    y += lineas.length * 5 + (opts.espacio ?? 4);
+  };
+
+  cabeceraPagina();
+
+  // Título del informe
+  doc.setFont('helvetica','bold'); doc.setFontSize(17);
+  doc.setTextColor(...INK);
+  const tituloLineas = doc.splitTextToSize(datos.puesto || 'Vacante', COL_W);
+  doc.text(tituloLineas, MARGIN, y);
+  y += tituloLineas.length * 7 + 2;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.setTextColor(...GRIS);
+  doc.text(`${datos.ubicacion || ''} · ${datos.sector || ''} · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}`, MARGIN, y);
+  y += 10;
+
+  // Veredicto
+  const v = inf.veredicto || {};
+  doc.setFillColor(245, 243, 249);
+  const vLineasTxt = doc.splitTextToSize(v.texto || '', COL_W - 10);
+  const vAltura = 10 + (v.titular ? 7 : 0) + vLineasTxt.length * 5 + 6;
+  salto(vAltura);
+  doc.roundedRect(MARGIN, y, COL_W, vAltura, 2, 2, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.setTextColor(...ACCENT);
+  doc.text('VEREDICTO', MARGIN + 5, y + 6);
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.setTextColor(...INK);
+  const vTitLineas = doc.splitTextToSize(v.titular || '', COL_W - 10);
+  doc.text(vTitLineas, MARGIN + 5, y + 13);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  doc.setTextColor(...GRIS);
+  doc.text(vLineasTxt, MARGIN + 5, y + 13 + vTitLineas.length * 5.5 + 3);
+  y += vAltura + 8;
+
+  // Benchmark salarial
+  const b = inf.benchmark_salarial || {};
+  titulo('Benchmark salarial');
+  if (b.rango_mercado_min && b.rango_mercado_max) {
+    parrafo(`${b.rango_mercado_min.toLocaleString('es-ES')}€ – ${b.rango_mercado_max.toLocaleString('es-ES')}€ brutos/año`, { bold:true, size:13, color: INK, espacio: 3 });
+  }
+  parrafo(b.comentario || '', { espacio: 2 });
+  if (Array.isArray(b.fuentes_consultadas) && b.fuentes_consultadas.length) {
+    parrafo('Fuentes cruzadas: ' + b.fuentes_consultadas.join(' · '), { size: 8.5, color: ACCENT, espacio: 6 });
+  }
+
+  // Tiempo de cobertura
+  const t = inf.tiempo_cobertura || {};
+  titulo('Tiempo estimado de cobertura');
+  if (t.semanas_min && t.semanas_max) {
+    parrafo(`${t.semanas_min}–${t.semanas_max} semanas`, { bold:true, size:13, color: INK, espacio: 3 });
+  }
+  parrafo(t.comentario || '', { espacio: 6 });
+
+  // Escasez de talento
+  const es = inf.escasez_talento || {};
+  titulo('Escasez de talento');
+  parrafo(`Índice ${es.indice ?? '—'}/100 · Nivel: ${es.nivel || '—'}`, { bold:true, size:11, color: INK, espacio: 3 });
+  if (es.candidatos_estimados) parrafo(es.candidatos_estimados, { size: 9, espacio: 2 });
+  parrafo(es.comentario || '', { espacio: 6 });
+
+  // Diagnóstico JD
+  const j = inf.diagnostico_jd || {};
+  titulo('Diagnóstico del job description');
+  parrafo(`Puntuación: ${j.puntuacion ?? '—'}/10`, { bold:true, size:11, color: INK, espacio: 3 });
+  if (Array.isArray(j.problemas) && j.problemas.length) {
+    j.problemas.forEach(p => parrafo('✕ ' + p, { size: 9.5, espacio: 2 }));
+  }
+  if (j.version_mejorada) {
+    y += 2;
+    parrafo('Versión skills-based sugerida:', { bold: true, size: 9.5, color: INK, espacio: 2 });
+    parrafo(j.version_mejorada, { size: 9, espacio: 6 });
+  }
+
+  // Recomendaciones
+  titulo('Acciones recomendadas');
+  (inf.recomendaciones || []).forEach(r => parrafo('→ ' + r, { size: 9.5, espacio: 3 }));
+
+  // Pie
+  salto(16);
+  y += 4;
+  doc.setDrawColor(220,214,232); doc.setLineWidth(0.3);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  y += 6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.setTextColor(...GRIS);
+  doc.text('Estimaciones generadas con IA a partir de fuentes públicas y criterio de weleapHUNT. Para datos verificados de candidatos reales, contacta con sergio@weleapinternational.com', MARGIN, y, { maxWidth: COL_W });
+
+  const nombreArchivo = 'radar-vacante-' + (datos.puesto || 'informe').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '.pdf';
+  doc.save(nombreArchivo);
+}
 </script>
 </body>
 </html>
