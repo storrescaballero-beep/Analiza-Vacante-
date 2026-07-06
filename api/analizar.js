@@ -12,11 +12,18 @@
 //   KV_REST_API_TOKEN   -> Token de Vercel KV. Si no está configurado, el límite queda desactivado (no rompe la app, pero no protege el gasto).
 //   LIMITE_DIARIO_EMAIL -> opcional, por defecto 3 (informes máximos por email al día — control fino real)
 //   LIMITE_DIARIO_IP    -> opcional, por defecto 15 (informes máximos por IP al día — más alto para no penalizar oficinas con IP compartida)
+//   DOMINIOS_SIN_LIMITE -> opcional, por defecto "weleapinternational.com" (dominios de email exentos del límite diario, separados por coma)
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "claude-opus-4-8";
 const LIMITE_DIARIO_EMAIL = Number(process.env.LIMITE_DIARIO_EMAIL) || 3;
 const LIMITE_DIARIO_IP = Number(process.env.LIMITE_DIARIO_IP) || 15;
+// Dominios de email exentos del límite diario (para pruebas internas sin restricción).
+// Añade más separándolos por coma en la env var, ej: "weleapinternational.com,otraempresa.com"
+const DOMINIOS_SIN_LIMITE = (process.env.DOMINIOS_SIN_LIMITE || "weleapinternational.com")
+  .split(",")
+  .map((d) => d.trim().toLowerCase())
+  .filter(Boolean);
 
 // Placements reales de weleap, como referencia de verdad para el modelo.
 // Añade aquí cierres reales (sector, puesto, ciudad, salario final, semanas hasta el cierre).
@@ -319,24 +326,30 @@ async function handler(req, res) {
 
     // Límite diario: email tiene un tope estricto (LIMITE_DIARIO_EMAIL), la IP uno
     // más permisivo (LIMITE_DIARIO_IP) para no penalizar oficinas con IP compartida.
+    // Los dominios internos (DOMINIOS_SIN_LIMITE) quedan exentos, para poder probar sin restricción.
     // Se comprueba ANTES de llamar a Claude para no gastar si ya está agotado.
-    const hoy = new Date().toISOString().slice(0, 10);
-    const ip = obtenerIP(req);
-    const claveEmail = `radar:limite:email:${String(d.email).trim().toLowerCase()}:${hoy}`;
-    const claveIp = `radar:limite:ip:${ip}:${hoy}`;
-    const [limiteEmail, limiteIp] = await Promise.all([
-      incrementarYComprobar(claveEmail, 86400, LIMITE_DIARIO_EMAIL),
-      incrementarYComprobar(claveIp, 86400, LIMITE_DIARIO_IP),
-    ]);
-    if (limiteEmail.limitado) {
-      return res.status(429).json({
-        error: `Ya has generado ${LIMITE_DIARIO_EMAIL} informes hoy con este email. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
-      });
-    }
-    if (limiteIp.limitado) {
-      return res.status(429).json({
-        error: `Se ha alcanzado el límite de informes gratuitos hoy desde esta red. Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
-      });
+    const dominioEmail = String(d.email).trim().toLowerCase().split("@")[1] || "";
+    const esInterno = DOMINIOS_SIN_LIMITE.includes(dominioEmail);
+
+    if (!esInterno) {
+      const hoy = new Date().toISOString().slice(0, 10);
+      const ip = obtenerIP(req);
+      const claveEmail = `radar:limite:email:${String(d.email).trim().toLowerCase()}:${hoy}`;
+      const claveIp = `radar:limite:ip:${ip}:${hoy}`;
+      const [limiteEmail, limiteIp] = await Promise.all([
+        incrementarYComprobar(claveEmail, 86400, LIMITE_DIARIO_EMAIL),
+        incrementarYComprobar(claveIp, 86400, LIMITE_DIARIO_IP),
+      ]);
+      if (limiteEmail.limitado) {
+        return res.status(429).json({
+          error: `Ya has generado ${LIMITE_DIARIO_EMAIL} informes hoy con este email (contador: ${limiteEmail.contador}). Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
+        });
+      }
+      if (limiteIp.limitado) {
+        return res.status(429).json({
+          error: `Se ha alcanzado el límite de informes gratuitos hoy desde esta red (contador: ${limiteIp.contador}). Vuelve mañana o escríbenos directamente a sergio@weleapinternational.com.`,
+        });
+      }
     }
 
     const mensajes = [{ role: "user", content: construirPromptUsuario(d) }];
