@@ -728,7 +728,7 @@ function generarPDF(inf, datos) {
   titulo('Diagnóstico del job description');
   parrafo(`Puntuación: ${j.puntuacion ?? '—'}/10`, { bold:true, size:11, color: INK, espacio: 3 });
   if (Array.isArray(j.problemas) && j.problemas.length) {
-    j.problemas.forEach(p => parrafo('✕ ' + p, { size: 9.5, espacio: 2 }));
+    j.problemas.forEach(p => parrafo('X ' + p, { size: 9.5, espacio: 2 }));
   }
   if (j.version_mejorada) {
     y += 2;
@@ -738,7 +738,7 @@ function generarPDF(inf, datos) {
 
   // Recomendaciones
   titulo('Acciones recomendadas');
-  (inf.recomendaciones || []).forEach(r => parrafo('→ ' + r, { size: 9.5, espacio: 3 }));
+  (inf.recomendaciones || []).forEach(r => parrafo('> ' + r, { size: 9.5, espacio: 3 }));
 
   // Pie
   salto(16);
