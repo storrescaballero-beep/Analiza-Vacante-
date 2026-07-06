@@ -1,10 +1,13 @@
 // /api/leads.js — Consulta de leads guardados por el Radar de Vacante
 // Uso: https://tu-dominio.vercel.app/api/leads?secret=TU_ADMIN_SECRET
-//      Añade &format=csv para descargarlo como CSV (listo para abrir en Excel/Sheets)
+//      Añade &format=csv  para descargarlo como CSV
+//      Añade &format=xlsx para descargarlo como Excel real, con columnas ya formateadas
 //
 // Variables de entorno necesarias:
 //   ADMIN_SECRET        -> contraseña que tú eliges para proteger este endpoint (obligatoria)
 //   KV_REST_API_URL / KV_REST_API_TOKEN -> las mismas que usa api/analizar.js
+
+const XLSX = require("xlsx");
 
 module.exports = async (req, res) => {
   if (req.method !== "GET") return res.status(405).json({ error: "Método no permitido" });
@@ -37,21 +40,36 @@ module.exports = async (req, res) => {
       }
     });
 
+    const cabecera = ["Fecha", "Nombre", "Email", "Empresa", "Puesto", "Sector", "Ubicación", "Salario ofrecido", "Veredicto", "Índice escasez", "Modelo"];
+    const filas = leads.map((l) => [
+      l.timestamp ? new Date(l.timestamp).toLocaleString("es-ES") : "",
+      l.lead?.nombre || "",
+      l.lead?.email || "",
+      l.lead?.empresa || "",
+      l.vacante?.puesto || "",
+      l.vacante?.sector || "",
+      l.vacante?.ubicacion || "",
+      l.vacante?.salario || "",
+      l.informe?.veredicto?.nivel || "",
+      l.informe?.escasez_talento?.indice ?? "",
+      l.modelo || "",
+    ]);
+
+    if (req.query.format === "xlsx") {
+      const hoja = XLSX.utils.aoa_to_sheet([cabecera, ...filas]);
+      hoja["!cols"] = [
+        { wch: 18 }, { wch: 22 }, { wch: 28 }, { wch: 22 }, { wch: 30 },
+        { wch: 22 }, { wch: 18 }, { wch: 16 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
+      ];
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, "Leads Radar");
+      const buffer = XLSX.write(libro, { type: "buffer", bookType: "xlsx" });
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", "attachment; filename=leads-radar-vacante.xlsx");
+      return res.status(200).send(buffer);
+    }
+
     if (req.query.format === "csv") {
-      const cabecera = ["fecha", "nombre", "email", "empresa", "puesto", "sector", "ubicacion", "salario", "veredicto", "escasez_indice", "modelo"];
-      const filas = leads.map((l) => [
-        l.timestamp || "",
-        l.lead?.nombre || "",
-        l.lead?.email || "",
-        l.lead?.empresa || "",
-        l.vacante?.puesto || "",
-        l.vacante?.sector || "",
-        l.vacante?.ubicacion || "",
-        l.vacante?.salario || "",
-        l.informe?.veredicto?.nivel || "",
-        l.informe?.escasez_talento?.indice ?? "",
-        l.modelo || "",
-      ]);
       const csv = [cabecera, ...filas]
         .map((fila) => fila.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
         .join("\n");
