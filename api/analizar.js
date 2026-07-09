@@ -5,15 +5,17 @@
 //   ANTHROPIC_API_KEY   -> tu API key de Anthropic (obligatoria)
 //   CLAUDE_MODEL        -> opcional, por defecto "claude-sonnet-5"
 //   FALLBACK_MODEL      -> opcional, por defecto "claude-opus-4-8"
-//   LEADS_WEBHOOK_URL   -> opcional, webhook de n8n para recibir cada lead + informe
+//   LEADS_WEBHOOK_URL   -> webhook de n8n. Si está configurado, cada lead recibe un email personalizado con el PDF adjunto (ver sección "Email automático" en el README). Si no está, el lead solo se guarda en Redis, sin email.
 //   ENABLE_WEB_SEARCH   -> opcional, "false" para desactivar la búsqueda de guías salariales (activa por defecto, es la base del benchmark real)
-//   MAX_TOKENS          -> opcional, por defecto 4000 (subido porque la búsqueda web consume turnos extra)
+//   MAX_TOKENS          -> opcional, por defecto 5000 (subido porque la búsqueda web y la comparativa internacional consumen turnos extra)
 //   KV_REST_API_URL     -> URL de Vercel KV (Storage → Create Database → KV). Necesaria para el límite de 3 informes/día.
 //   KV_REST_API_TOKEN   -> Token de Vercel KV. Si no está configurado, el límite queda desactivado (no rompe la app, pero no protege el gasto).
 //   LIMITE_DIARIO_EMAIL -> opcional, por defecto 3 (informes máximos por email al día — control fino real)
 //   LIMITE_DIARIO_IP    -> opcional, por defecto 15 (informes máximos por IP al día — más alto para no penalizar oficinas con IP compartida)
 //   DOMINIOS_SIN_LIMITE -> opcional, por defecto "weleapinternational.com" (dominios de email exentos del límite diario, separados por coma)
 //   ADMIN_SECRET        -> contraseña para consultar los leads guardados vía /api/leads (obligatoria si quieres usar ese endpoint)
+
+const { generarPDFBuffer } = require("../lib/pdf.js");
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "claude-opus-4-8";
@@ -46,6 +48,7 @@ Tienes acceso a búsqueda web. ÚSALA SIEMPRE para el benchmark salarial, en est
 4. Si una fuente no cubre el sector o el puesto es muy nicho, indícalo y extrapola desde el perfil de seniority/función más cercano, dejándolo claro en el comentario.
 5. Nunca reproduzcas texto literal de las guías: sintetiza solo las cifras y tu propia interpretación.
 6. Registra en "fuentes_consultadas" qué guías lograste consultar realmente (no las que ibas a consultar), y si usaste placements propios de weleap, inclúyelo como "Histórico de cierres weleap" en esa misma lista.
+7. LÍMITE DE BÚSQUEDAS: no hagas más de 8 búsquedas web en total para todo el informe (incluyendo la comparativa internacional de abajo). Agrupa: una búsqueda tipo "salario [puesto] Europa 2026" o "talent shortage [puesto] international" puede darte datos de varios países a la vez — prefiere eso a una búsqueda por país.
 
 Analiza teniendo en cuenta:
 1. BENCHMARK SALARIAL: rango de mercado en España para ese puesto, sector y ubicación (ajusta por ciudad: Madrid/Barcelona vs resto), calculado como media ponderada de las guías salariales públicas que hayas consultado por búsqueda web. Si el salario ofrecido está por debajo de mercado, dilo sin rodeos.
@@ -53,6 +56,7 @@ Analiza teniendo en cuenta:
 3. ESCASEZ DE TALENTO: índice 0-100 (100 = casi imposible de encontrar). Considera cuántos profesionales con ese perfil existen en España, cuántos están en búsqueda activa vs pasiva, y competencia por ellos.
 4. DIAGNÓSTICO DEL JOB DESCRIPTION: puntuación 0-10. Los mejores JD son skills-based (habilidades demostrables) en vez de títulos + años de experiencia. Penaliza: listas interminables de requisitos, "unicornios" (perfiles que no existen), jerga interna, ausencia de rango salarial, cero propuesta de valor al candidato. Si no aportan JD, evalúa con lo que tengas y márcalo.
 5. VEREDICTO: un titular provocador estilo weleap que resuma la situación real de esta vacante en el mercado. Ejemplos de tono: "Buscáis un unicornio con sueldo de poni", "Vacante bien planteada, pero llegáis tarde: ese perfil ya lo están cazando otros tres", "Con este salario en Asturias, prepárate para 5 meses de búsqueda".
+6. COMPARATIVA INTERNACIONAL: weleap opera en 8 países, así que esto es una ventaja real frente a un headhunter local. Elige los 4-5 países MÁS RELEVANTES para este sector/puesto concreto (considera: dónde hay más concentración de esa industria, dónde weleap tiene más actividad, mercados limítrofes obvios). Incluye siempre España como referencia aunque no sea el país más fácil. Para cada país, busca en la web (agrupando países en la misma búsqueda cuando puedas, respetando el límite de 8 búsquedas totales) y estima un índice de disponibilidad de talento 0-100 (100 = talento abundante y fácil de encontrar, 0 = extremadamente escaso). Ordena de más fácil a más difícil. Si el puesto/sector no tiene sentido fuera de España (ej. muy regulatorio/local), dilo y limita la comparativa a España + 1-2 países limítrofes con nota aclaratoria.
 
 REGLAS DE SALIDA:
 - Responde ÚNICAMENTE con un objeto JSON válido, sin markdown, sin backticks, sin texto antes o después.
@@ -94,7 +98,22 @@ ESQUEMA JSON EXACTO:
     "version_mejorada": "string, reescritura skills-based del titular + 4-6 requisitos clave del JD, formato texto plano con saltos de línea",
     "comentario": "string, 1 frase"
   },
-  "recomendaciones": ["string", "string", "string"] (3 acciones concretas y accionables)
+  "recomendaciones": ["string", "string", "string"] (3 acciones concretas y accionables),
+  "comparativa_internacional": {
+    "paises": [
+      {
+        "pais": "string, nombre del país",
+        "indice_disponibilidad": number (0-100, 100 = talento abundante y fácil),
+        "nivel": "facil | media | dificil | muy_dificil",
+        "comentario": "string, 1 frase explicando por qué"
+      }
+    ] (4-5 países, ordenados de más fácil a más difícil, España siempre incluida),
+    "conclusion": "string, 1-2 frases con la lectura estratégica: dónde buscaría weleap si el cliente está abierto a otros mercados"
+  },
+  "email_personalizado": {
+    "asunto": "string, máx 70 caracteres, específico de esta vacante (no genérico tipo 'tu informe'), ej. 'Tu radar: [puesto] en [ubicación] — el dato que no esperabas'",
+    "cuerpo": "string, 3-4 frases en tono weleap (directo, con criterio, sin relleno corporativo). Dirígete a la persona por su nombre. Destaca el hallazgo MÁS interesante o sorprendente de este análisis concreto (ej. si hay un país con mucha más disponibilidad, si el salario está muy desalineado, si la escasez es crítica). Cierra invitando a responder el email o a hablar con weleap si el perfil es de los difíciles. NO uses '\\n' aquí, todo en un único párrafo fluido."
+  }
 }`;
 
 function construirPromptUsuario(datos) {
@@ -124,7 +143,7 @@ Devuelve el informe JSON.`;
 async function llamarClaude(modelo, mensajes, conBusqueda) {
   const body = {
     model: modelo,
-    max_tokens: Number(process.env.MAX_TOKENS) || 4000,
+    max_tokens: Number(process.env.MAX_TOKENS) || 5000,
     system: SYSTEM_PROMPT,
     messages: mensajes,
   };
@@ -224,10 +243,20 @@ function parsearJSON(texto) {
   }
 }
 
-async function enviarLeadWebhook(lead, informe, modeloUsado) {
+async function enviarLeadWebhook(lead, informe, modeloUsado, datosVacante) {
   const url = process.env.LEADS_WEBHOOK_URL;
   if (!url) return;
   try {
+    // Genera el PDF aquí, justo antes de mandarlo — si falla, el lead y el
+    // informe igualmente llegan a n8n (sin adjunto) en vez de perderse todo.
+    let pdfBase64 = null;
+    try {
+      const buffer = generarPDFBuffer(informe, datosVacante);
+      pdfBase64 = buffer.toString("base64");
+    } catch (e) {
+      console.error("No se pudo generar el PDF para el email:", e.message);
+    }
+
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -243,6 +272,9 @@ async function enviarLeadWebhook(lead, informe, modeloUsado) {
         },
         informe,
         modelo: modeloUsado,
+        email_personalizado: informe.email_personalizado || null,
+        pdf_base64: pdfBase64,
+        pdf_nombre_archivo: "radar-vacante-" + (lead.puesto || "informe").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) + ".pdf",
       }),
     });
   } catch (e) {
@@ -437,7 +469,7 @@ async function handler(req, res) {
       informe,
       modelo: modeloUsado,
     });
-    await enviarLeadWebhook(leadInfo, informe, modeloUsado);
+    await enviarLeadWebhook(leadInfo, informe, modeloUsado, d);
 
     return res.status(200).json({ informe, modelo: modeloUsado });
   } catch (e) {
