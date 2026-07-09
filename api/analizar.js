@@ -183,7 +183,7 @@ Devuelve el informe JSON.`;
 async function llamarClaude(modelo, mensajes, conBusqueda) {
   const body = {
     model: modelo,
-    max_tokens: Number(process.env.MAX_TOKENS) || 5000,
+    max_tokens: Number(process.env.MAX_TOKENS) || 8000,
     system: SYSTEM_PROMPT,
     messages: mensajes,
     tools: conBusqueda
@@ -482,8 +482,10 @@ async function handler(req, res) {
     try {
       data = await llamarClaude(MODEL, mensajes, conBusqueda);
       // Fable 5 puede devolver stop_reason "refusal" si salta un clasificador.
-      // En ese caso reintentamos con el modelo de respaldo.
-      if (data.stop_reason === "refusal") {
+      // "max_tokens" significa que se quedó sin espacio antes de terminar el
+      // informe (raro pero pasa con perfiles complejos que disparan muchas
+      // búsquedas). En ambos casos reintentamos con el modelo de respaldo.
+      if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") {
         modeloUsado = FALLBACK_MODEL;
         data = await llamarClaude(FALLBACK_MODEL, mensajes, conBusqueda);
       }
@@ -499,6 +501,19 @@ async function handler(req, res) {
     let informe = extraerInformeDeToolUse(data);
     if (!informe) {
       informe = parsearJSON(extraerTexto(data));
+    }
+
+    // Validación de completitud: si algún campo crítico falta (p.ej. porque se
+    // cortó a media generación pese al reintento), mejor fallar con un mensaje
+    // claro que mandar al lead un PDF a medias.
+    const camposCriticos = [
+      informe?.veredicto?.titular,
+      informe?.diagnostico_jd?.puntuacion,
+      Array.isArray(informe?.recomendaciones) && informe.recomendaciones.length > 0,
+      informe?.comparativa_internacional?.paises?.length > 0,
+    ];
+    if (camposCriticos.some((c) => c === undefined || c === null || c === false)) {
+      throw new Error("El informe se generó incompleto. Inténtalo de nuevo.");
     }
 
     const leadInfo = {
