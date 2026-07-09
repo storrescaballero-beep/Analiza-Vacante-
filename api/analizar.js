@@ -63,58 +63,98 @@ REGLAS DE SALIDA:
 - Todos los textos en español de España.
 - Los salarios en euros brutos anuales.
 - Sé específico con números, nunca vago.
-- CRÍTICO: si un valor string necesita salto de línea (por ejemplo "version_mejorada"), usa el carácter de escape \\n dentro del string. Nunca insertes un salto de línea real sin escapar: rompe el JSON.
-- CRÍTICO: si necesitas citar una palabra o frase dentro de un valor string, usa comillas simples ('así'), nunca comillas dobles. Una comilla doble sin escapar dentro de un string rompe el JSON.
+- Tu respuesta final DEBE ser una llamada a la herramienta "entregar_informe" con todos los campos completos. No respondas con texto libre en ningún momento: investiga con web_search todo lo que necesites, y cuando tengas todo, entrega el resultado únicamente a través de esa herramienta.`;
 
-ESQUEMA JSON EXACTO:
-{
-  "veredicto": {
-    "titular": "string, máx 90 caracteres, provocador",
-    "texto": "string, 2-3 frases que expliquen la situación real",
-    "nivel": "verde | ambar | rojo"
+const HERRAMIENTA_INFORME = {
+  name: "entregar_informe",
+  description: "Entrega el informe final estructurado del Radar de Vacante. Llama a esta herramienta una única vez, como tu respuesta final, después de haber investigado con web_search todo lo necesario.",
+  input_schema: {
+    type: "object",
+    properties: {
+      veredicto: {
+        type: "object",
+        properties: {
+          titular: { type: "string", description: "Máx 90 caracteres, provocador, estilo weleap" },
+          texto: { type: "string", description: "2-3 frases que expliquen la situación real" },
+          nivel: { type: "string", enum: ["verde", "ambar", "rojo"] },
+        },
+        required: ["titular", "texto", "nivel"],
+      },
+      benchmark_salarial: {
+        type: "object",
+        properties: {
+          rango_mercado_min: { type: "number" },
+          rango_mercado_max: { type: "number" },
+          posicion_oferta: { type: "string", enum: ["por_debajo", "en_linea", "por_encima", "no_indicado"] },
+          comentario: { type: "string" },
+          fuentes_consultadas: { type: "array", items: { type: "string" }, description: "Nombres de las guías realmente consultadas, máx 5" },
+        },
+        required: ["rango_mercado_min", "rango_mercado_max", "posicion_oferta", "comentario", "fuentes_consultadas"],
+      },
+      tiempo_cobertura: {
+        type: "object",
+        properties: {
+          semanas_min: { type: "number" },
+          semanas_max: { type: "number" },
+          comentario: { type: "string" },
+        },
+        required: ["semanas_min", "semanas_max", "comentario"],
+      },
+      escasez_talento: {
+        type: "object",
+        properties: {
+          indice: { type: "number", description: "0-100" },
+          nivel: { type: "string", enum: ["baja", "media", "alta", "critica"] },
+          candidatos_estimados: { type: "string" },
+          comentario: { type: "string" },
+        },
+        required: ["indice", "nivel", "candidatos_estimados", "comentario"],
+      },
+      diagnostico_jd: {
+        type: "object",
+        properties: {
+          puntuacion: { type: "number", description: "0-10" },
+          jd_aportado: { type: "boolean" },
+          problemas: { type: "array", items: { type: "string" }, description: "Máx 4, los más graves" },
+          version_mejorada: { type: "string", description: "Reescritura skills-based del titular + 4-6 requisitos clave, con saltos de línea reales (aquí SÍ puedes usarlos, es un campo de herramienta, no JSON de texto)" },
+          comentario: { type: "string" },
+        },
+        required: ["puntuacion", "jd_aportado", "problemas", "version_mejorada", "comentario"],
+      },
+      recomendaciones: { type: "array", items: { type: "string" }, description: "3 acciones concretas y accionables" },
+      comparativa_internacional: {
+        type: "object",
+        properties: {
+          paises: {
+            type: "array",
+            description: "4-5 países ordenados de más fácil a más difícil, España siempre incluida",
+            items: {
+              type: "object",
+              properties: {
+                pais: { type: "string" },
+                indice_disponibilidad: { type: "number", description: "0-100, 100 = talento abundante y fácil" },
+                nivel: { type: "string", enum: ["facil", "media", "dificil", "muy_dificil"] },
+                comentario: { type: "string" },
+              },
+              required: ["pais", "indice_disponibilidad", "nivel", "comentario"],
+            },
+          },
+          conclusion: { type: "string", description: "Lectura estratégica: dónde buscaría weleap si el cliente está abierto a otros mercados" },
+        },
+        required: ["paises", "conclusion"],
+      },
+      email_personalizado: {
+        type: "object",
+        properties: {
+          asunto: { type: "string", description: "Máx 70 caracteres, específico de esta vacante, no genérico" },
+          cuerpo: { type: "string", description: "3-4 frases en tono weleap, dirigido a la persona por su nombre, destacando el hallazgo más interesante del análisis, cerrando con invitación a responder o hablar con weleap" },
+        },
+        required: ["asunto", "cuerpo"],
+      },
+    },
+    required: ["veredicto", "benchmark_salarial", "tiempo_cobertura", "escasez_talento", "diagnostico_jd", "recomendaciones", "comparativa_internacional", "email_personalizado"],
   },
-  "benchmark_salarial": {
-    "rango_mercado_min": number,
-    "rango_mercado_max": number,
-    "posicion_oferta": "por_debajo | en_linea | por_encima | no_indicado",
-    "comentario": "string, 1-2 frases",
-    "fuentes_consultadas": ["string", "..."] (nombres de las guías realmente consultadas, ej. "Hays Guía del Mercado Laboral 2026", máx 5)
-  },
-  "tiempo_cobertura": {
-    "semanas_min": number,
-    "semanas_max": number,
-    "comentario": "string, 1-2 frases"
-  },
-  "escasez_talento": {
-    "indice": number (0-100),
-    "nivel": "baja | media | alta | critica",
-    "candidatos_estimados": "string, ej. '300-500 profesionales en España, <10% en búsqueda activa'",
-    "comentario": "string, 1-2 frases"
-  },
-  "diagnostico_jd": {
-    "puntuacion": number (0-10),
-    "jd_aportado": boolean,
-    "problemas": ["string", "..."] (máx 4, los más graves),
-    "version_mejorada": "string, reescritura skills-based del titular + 4-6 requisitos clave del JD, formato texto plano con saltos de línea",
-    "comentario": "string, 1 frase"
-  },
-  "recomendaciones": ["string", "string", "string"] (3 acciones concretas y accionables),
-  "comparativa_internacional": {
-    "paises": [
-      {
-        "pais": "string, nombre del país",
-        "indice_disponibilidad": number (0-100, 100 = talento abundante y fácil),
-        "nivel": "facil | media | dificil | muy_dificil",
-        "comentario": "string, 1 frase explicando por qué"
-      }
-    ] (4-5 países, ordenados de más fácil a más difícil, España siempre incluida),
-    "conclusion": "string, 1-2 frases con la lectura estratégica: dónde buscaría weleap si el cliente está abierto a otros mercados"
-  },
-  "email_personalizado": {
-    "asunto": "string, máx 70 caracteres, específico de esta vacante (no genérico tipo 'tu informe'), ej. 'Tu radar: [puesto] en [ubicación] — el dato que no esperabas'",
-    "cuerpo": "string, 3-4 frases en tono weleap (directo, con criterio, sin relleno corporativo). Dirígete a la persona por su nombre. Destaca el hallazgo MÁS interesante o sorprendente de este análisis concreto (ej. si hay un país con mucha más disponibilidad, si el salario está muy desalineado, si la escasez es crítica). Cierra invitando a responder el email o a hablar con weleap si el perfil es de los difíciles. NO uses '\\n' aquí, todo en un único párrafo fluido."
-  }
-}`;
+};
 
 function construirPromptUsuario(datos) {
   const relevantes = WELEAP_PLACEMENTS.filter(
@@ -146,10 +186,13 @@ async function llamarClaude(modelo, mensajes, conBusqueda) {
     max_tokens: Number(process.env.MAX_TOKENS) || 5000,
     system: SYSTEM_PROMPT,
     messages: mensajes,
+    tools: conBusqueda
+      ? [{ type: "web_search_20250305", name: "web_search" }, HERRAMIENTA_INFORME]
+      : [HERRAMIENTA_INFORME],
+    // "auto" y no forzado: así el modelo puede investigar con web_search primero
+    // y entregar el resultado con la herramienta al final, en vez de forzarla desde el turno 1.
+    tool_choice: { type: "auto" },
   };
-  if (conBusqueda) {
-    body.tools = [{ type: "web_search_20250305", name: "web_search" }];
-  }
 
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -166,6 +209,14 @@ async function llamarClaude(modelo, mensajes, conBusqueda) {
     throw new Error(`Anthropic API ${resp.status}: ${err}`);
   }
   return resp.json();
+}
+
+// Busca el bloque tool_use de "entregar_informe" en la respuesta — su "input" ya
+// viene como objeto validado por la API, sin necesidad de parsear texto nunca.
+function extraerInformeDeToolUse(data) {
+  const bloque = (data.content || []).find((b) => b.type === "tool_use" && b.name === "entregar_informe");
+  if (bloque && bloque.input) return bloque.input;
+  return null;
 }
 
 function extraerTexto(data) {
@@ -442,7 +493,13 @@ async function handler(req, res) {
       data = await llamarClaude(FALLBACK_MODEL, mensajes, conBusqueda);
     }
 
-    const informe = parsearJSON(extraerTexto(data));
+    // Vía principal: el informe llega ya estructurado y validado en el tool_use.
+    // Red de seguridad: si por lo que sea el modelo respondiera en texto libre
+    // (no debería, pero por si acaso), intentamos parsear igual que antes.
+    let informe = extraerInformeDeToolUse(data);
+    if (!informe) {
+      informe = parsearJSON(extraerTexto(data));
+    }
 
     const leadInfo = {
       nombre: d.nombre,
