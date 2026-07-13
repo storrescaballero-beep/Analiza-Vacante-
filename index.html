@@ -169,6 +169,17 @@
   .jd-mejorado .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:12px}
   .jd-mejorado pre{font-family:var(--body);font-size:15px;color:#E8EDEC;white-space:pre-wrap;line-height:1.7}
 
+  .pais-fila{display:grid;grid-template-columns:140px 1fr 60px;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--ink-3)}
+  .pais-fila:last-child{border-bottom:none}
+  .pais-nombre{font-weight:600;font-size:15px;color:#fff}
+  .pais-nombre .bandera{margin-right:6px}
+  .pais-barra-wrap{position:relative;height:10px;background:var(--ink-3);border-radius:5px;overflow:hidden}
+  .pais-barra{position:absolute;top:0;left:0;bottom:0;border-radius:5px;transition:width 1s ease}
+  .pais-indice{font-family:var(--mono);font-size:14px;font-weight:600;text-align:right}
+  .pais-comentario{grid-column:1/-1;font-size:13.5px;color:var(--muted-dark);margin-top:4px}
+  .pais-espana{position:relative}
+  .pais-espana::after{content:'ESTA VACANTE';position:absolute;top:-14px;left:0;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--accent)}
+
   .recos{list-style:none}
   .recos li{font-size:15.5px;color:#E8EDEC;padding-left:28px;position:relative;margin-bottom:12px}
   .recos li::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:600}
@@ -232,7 +243,10 @@
     <div class="eyebrow">Herramienta gratuita · weleapHUNT executive search</div>
     <h1>Antes de publicar esa vacante, entérate de si <em>el candidato existe</em>.</h1>
     <p class="hero-sub">Pega tu vacante y en 30 segundos recibes lo que un headhunter tarda una semana en decirte: benchmark salarial real, tiempo de cobertura, escasez del perfil y un diagnóstico sin anestesia de tu job description.</p>
-    <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+      <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
+      <button type="button" id="btn-ver-ejemplo" class="btn" style="background:transparent;border:2px solid rgba(255,255,255,.3);color:#fff">Ver un ejemplo primero</button>
+    </div>
     <p class="hero-proof">Análisis con IA de última generación + criterio de <strong>weleapHUNT</strong>: más de 25 años de experiencia, presencia en 8 países, 100+ búsquedas ejecutivas entregadas.</p>
   </div>
 </header>
@@ -332,7 +346,10 @@
 
     <!-- SECTION: informe -->
     <div id="informe">
-      <div class="informe-head" style="margin-top:46px">
+      <div id="banner-ejemplo" style="display:none;background:var(--accent);color:#fff;text-align:center;font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:8px;margin-top:46px">
+        Esto es un ejemplo con datos ficticios — no ha consumido ningún análisis real
+      </div>
+      <div class="informe-head" style="margin-top:20px">
         <span id="inf-meta">RADAR // —</span>
         <span id="inf-fecha"></span>
       </div>
@@ -389,6 +406,12 @@
             <span class="tag">Versión skills-based · lista para publicar</span>
             <pre id="jd-mejorado"></pre>
           </div>
+        </div>
+
+        <div class="icard full">
+          <h4>R6 · Comparativa internacional · ¿dónde es más fácil encontrar este perfil?</h4>
+          <div id="paises-lista"></div>
+          <p class="coment" id="paises-conclusion" style="margin-top:16px"></p>
         </div>
       </div>
 
@@ -524,9 +547,10 @@ $('form-radar').addEventListener('submit', async e => {
 });
 
 // ---- render del informe ----
-function renderInforme(inf, datos) {
+function renderInforme(inf, datos, esEjemplo) {
   ultimoInforme = inf;
   ultimosDatos = datos;
+  $('banner-ejemplo').style.display = esEjemplo ? 'block' : 'none';
   $('inf-meta').textContent = `RADAR // ${datos.puesto.toUpperCase()} · ${datos.ubicacion.toUpperCase()}`;
   $('inf-fecha').textContent = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
 
@@ -597,6 +621,24 @@ function renderInforme(inf, datos) {
   $('jd-problemas').innerHTML = (j.problemas||[]).map(p=>`<li>${escapeHTML(p)}</li>`).join('');
   $('jd-mejorado').textContent = j.version_mejorada || '';
 
+  // comparativa internacional
+  const comp = inf.comparativa_internacional || {};
+  const paises = Array.isArray(comp.paises) ? comp.paises : [];
+  const nivelColor = { facil: 'var(--ok)', media: 'var(--warn)', dificil: 'var(--bad)', muy_dificil: 'var(--bad)' };
+  $('paises-lista').innerHTML = paises.map(p => {
+    const idx = Math.max(0, Math.min(100, Number(p.indice_disponibilidad) || 0));
+    const color = nivelColor[p.nivel] || 'var(--muted-dark)';
+    const esEspana = /espa/i.test(p.pais || '');
+    return `
+      <div class="pais-fila ${esEspana ? 'pais-espana' : ''}">
+        <div class="pais-nombre">${escapeHTML(p.pais || '')}</div>
+        <div class="pais-barra-wrap"><div class="pais-barra" style="width:${idx}%;background:${color}"></div></div>
+        <div class="pais-indice" style="color:${color}">${idx}</div>
+        <div class="pais-comentario">${escapeHTML(p.comentario || '')}</div>
+      </div>`;
+  }).join('');
+  $('paises-conclusion').textContent = comp.conclusion || '';
+
   // CTA personalizado
   $('cta-link').href = `mailto:sergio@weleapinternational.com?subject=${encodeURIComponent('Radar de Vacante — '+datos.puesto)}&body=${encodeURIComponent('Hola weleap,\n\nAcabo de escanear la vacante "'+datos.puesto+'" ('+datos.ubicacion+') y quiero hablar sobre la búsqueda.\n\n'+datos.nombre+' — '+datos.empresa)}`;
 
@@ -607,6 +649,53 @@ function renderInforme(inf, datos) {
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---- botón "Analizar otra vacante" ----
+// ---- informe de ejemplo (100% estático, no gasta ningún análisis real) ----
+const INFORME_EJEMPLO = {
+  veredicto: {
+    titular: "Buscáis un unicornio con sueldo de poni",
+    texto: "El salario ofrecido está un 18% por debajo de la media de mercado para este perfil, y encima pedís bilingüismo + 8 años de experiencia muy específica. Con estas condiciones, los mejores candidatos ni van a aplicar.",
+    nivel: "rojo",
+  },
+  benchmark_salarial: {
+    rango_mercado_min: 65000, rango_mercado_max: 85000, posicion_oferta: "por_debajo",
+    comentario: "La oferta de 58.000€ queda claramente por debajo del rango de mercado para un perfil senior de este sector en Madrid.",
+    fuentes_consultadas: ["INE Encuesta de Estructura Salarial", "Hays Guía del Mercado Laboral 2026", "Michael Page Estudio de Remuneración 2026"],
+  },
+  tiempo_cobertura: { semanas_min: 12, semanas_max: 20, comentario: "Con un salario por debajo de mercado y requisitos tan específicos, el proceso previsiblemente superará los 4 meses." },
+  escasez_talento: { indice: 78, nivel: "alta", candidatos_estimados: "100-150 profesionales en España, menos del 8% en búsqueda activa", comentario: "Perfil muy escaso: la combinación de sector, idioma y seniority reduce muchísimo el pool real." },
+  diagnostico_jd: {
+    puntuacion: 4, jd_aportado: true,
+    problemas: [
+      "Lista de 14 requisitos, varios de ellos poco realistas combinados entre sí",
+      "No se menciona rango salarial ni beneficios, lo que reduce la conversión de candidatos pasivos",
+      "Jerga interna de la empresa sin explicar, dificulta que un candidato externo entienda el rol real",
+    ],
+    version_mejorada: "Director/a de Operaciones (España)\n\nLo que debes poder demostrar:\n- Experiencia liderando equipos de operaciones de 20+ personas\n- Track record de mejora de eficiencia en entornos industriales\n- Inglés profesional (no obligatorio nativo)\n\nLo que ofrecemos: 70.000-80.000€ + variable, coche de empresa, plan de carrera.",
+    comentario: "Reescritura skills-based que amplía el pool sin bajar el nivel real exigido.",
+  },
+  recomendaciones: [
+    "Subir el salario a la banda 70.000-80.000€ o el proceso se alargará más de 4 meses",
+    "Quitar el requisito de idioma nativo — inglés profesional es suficiente y triplica el pool",
+    "Publicar el rango salarial en la oferta: sube la tasa de aplicación de candidatos senior un 30-40%",
+  ],
+  comparativa_internacional: {
+    paises: [
+      { pais: "España", indice_disponibilidad: 22, nivel: "dificil", comentario: "Pool reducido y muy disputado entre las principales consultoras." },
+      { pais: "Portugal", indice_disponibilidad: 38, nivel: "media", comentario: "Más disponibilidad, salarios más bajos atraen talento español." },
+      { pais: "Polonia", indice_disponibilidad: 61, nivel: "media", comentario: "Hub industrial europeo con buena disponibilidad de perfiles similares." },
+      { pais: "México", indice_disponibilidad: 55, nivel: "media", comentario: "Creciente oferta de perfiles bilingües por nearshoring." },
+    ],
+    conclusion: "Si el cliente está abierto a modelo híbrido o remoto, Polonia y México ofrecen bastante más disponibilidad que España al mismo presupuesto.",
+  },
+  email_personalizado: { asunto: "Ejemplo", cuerpo: "Este es un email de ejemplo." },
+};
+const DATOS_EJEMPLO = { puesto: "Director de Operaciones", sector: "Ingeniería e industrial", ubicacion: "Madrid", salario: "58.000€", nombre: "Ejemplo", email: "ejemplo@empresa.com" };
+
+$('btn-ver-ejemplo').addEventListener('click', () => {
+  renderInforme(INFORME_EJEMPLO, DATOS_EJEMPLO, true);
+  $('informe').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
 $('btn-otra-vacante').addEventListener('click', () => {
   $('informe').style.display = 'none';
   $('form-radar').reset();
@@ -739,6 +828,38 @@ function generarPDF(inf, datos) {
   // Recomendaciones
   titulo('Acciones recomendadas');
   (inf.recomendaciones || []).forEach(r => parrafo('> ' + r, { size: 9.5, espacio: 3 }));
+
+  // Comparativa internacional
+  const comp = inf.comparativa_internacional || {};
+  const paisesPdf = Array.isArray(comp.paises) ? comp.paises : [];
+  if (paisesPdf.length) {
+    titulo('Comparativa internacional: dónde es más fácil encontrar este perfil');
+    const nivelColorPdf = { facil: [47,191,113], media: [255,176,32], dificil: [230,57,80], muy_dificil: [230,57,80] };
+    paisesPdf.forEach(p => {
+      const idx = Math.max(0, Math.min(100, Number(p.indice_disponibilidad) || 0));
+      const color = nivelColorPdf[p.nivel] || GRIS;
+      salto(14);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.setTextColor(...INK);
+      doc.text(String(p.pais || ''), MARGIN, y);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.setTextColor(...color);
+      doc.text(String(idx), PAGE_W - MARGIN, y, { align: 'right' });
+      y += 4;
+      // barra de fondo
+      doc.setFillColor(230,226,238);
+      doc.roundedRect(MARGIN, y, COL_W, 2.5, 1, 1, 'F');
+      // barra de progreso
+      doc.setFillColor(...color);
+      doc.roundedRect(MARGIN, y, COL_W * (idx / 100), 2.5, 1, 1, 'F');
+      y += 6;
+      parrafo(p.comentario || '', { size: 8.5, espacio: 5 });
+    });
+    if (comp.conclusion) {
+      y += 2;
+      parrafo(comp.conclusion, { size: 9, bold: true, color: INK, espacio: 6 });
+    }
+  }
 
   // Pie
   salto(16);
