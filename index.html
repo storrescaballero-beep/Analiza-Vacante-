@@ -148,6 +148,13 @@
   .riesgo-problemas li{font-size:14px;color:#E8EDEC;padding-left:22px;position:relative;margin-bottom:8px}
   .riesgo-problemas li::before{content:'⚠';position:absolute;left:0}
 
+  .metodologia{background:var(--ink);border:1px solid var(--ink-3)}
+  .metodologia h4{color:var(--muted-dark)}
+  .metodologia-fuentes{list-style:none;counter-reset:fuente;margin-bottom:18px}
+  .metodologia-fuentes li{counter-increment:fuente;font-size:13.5px;color:#D9D2E8;padding-left:26px;position:relative;margin-bottom:9px;line-height:1.5}
+  .metodologia-fuentes li::before{content:counter(fuente);position:absolute;left:0;top:0;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center}
+  .metodologia-nota{font-size:12.5px;color:var(--muted-dark);line-height:1.6;border-top:1px solid var(--ink-3);padding-top:16px}
+
   .informe-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px}
   .icard{background:var(--ink-2);border:1px solid var(--ink-3);border-radius:14px;padding:28px}
   .icard.full{grid-column:1/-1}
@@ -255,13 +262,13 @@
   </div>
   <div class="wrap hero-content">
     <div class="eyebrow">Herramienta gratuita · weleapHUNT executive search</div>
-    <h1>Antes de publicar esa vacante, entérate de si <em>el candidato existe</em>.</h1>
-    <p class="hero-sub">Pega tu vacante y en 30 segundos recibes lo que un headhunter tarda una semana en decirte: benchmark salarial real, tiempo de cobertura, escasez del perfil y un diagnóstico sin anestesia de tu job description.</p>
+    <h1>Valide la viabilidad de su búsqueda <em>antes de publicarla</em>.</h1>
+    <p class="hero-sub">Introduzca los datos de la posición y obtenga, en menos de un minuto, el análisis que un consultor senior de executive search entregaría tras una semana de trabajo: benchmarking salarial, tiempo estimado de cobertura, disponibilidad real de talento y una auditoría completa de la descripción del puesto.</p>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
       <button type="button" id="btn-ver-ejemplo" class="btn" style="background:transparent;border:2px solid rgba(255,255,255,.3);color:#fff">Ver un ejemplo primero</button>
     </div>
-    <p class="hero-proof">Análisis con IA de última generación + criterio de <strong>weleapHUNT</strong>: más de 25 años de experiencia, presencia en 8 países, 100+ búsquedas ejecutivas entregadas.</p>
+    <p class="hero-proof">Análisis respaldado por inteligencia artificial de última generación y el criterio de <strong>weleapHUNT</strong>: más de 25 años de experiencia, presencia en 8 países y más de 100 búsquedas ejecutivas completadas.</p>
   </div>
 </header>
 
@@ -269,12 +276,12 @@
 <section class="pain">
   <div class="wrap">
     <p class="sec-label">El problema</p>
-    <h2>El 70% de las vacantes que no se cubren estaban muertas antes de publicarse.</h2>
-    <p class="sec-intro">No es tu ATS. No es tu employer branding. Es que la vacante se definió de espaldas al mercado.</p>
+    <h2>El 70% de las posiciones que no llegan a cubrirse presentaban señales de alerta desde su publicación.</h2>
+    <p class="sec-intro">No suele ser el ATS ni la marca empleadora. Es que la posición se definió sin contrastarla con el mercado real.</p>
     <div class="pain-grid">
-      <div class="pain-card fade"><span class="mono">Señal 01</span><p>Pides un perfil que en toda España tienen 200 personas. Y ofreces el salario del percentil 30. Nadie te lo dice hasta el mes 4.</p></div>
-      <div class="pain-card fade"><span class="mono">Señal 02</span><p>Tu job description lista 14 requisitos y años de experiencia. Los ATS y los buenos candidatos ya filtran por skills. Estás espantando justo a quien buscas.</p></div>
-      <div class="pain-card fade"><span class="mono">Señal 03</span><p>Dirección te pregunta cuándo estará cubierta. Respondes "pronto" porque no tienes datos. El Radar te da la cifra para poner sobre la mesa.</p></div>
+      <div class="pain-card fade"><span class="mono">Señal 01</span><p>Se solicita un perfil del que existen apenas 200 profesionales en toda España, con un salario situado en el percentil 30. La incidencia no se detecta hasta el cuarto mes de proceso.</p></div>
+      <div class="pain-card fade"><span class="mono">Señal 02</span><p>La descripción del puesto enumera 14 requisitos formulados en años de experiencia. Los sistemas de selección y los mejores candidatos ya filtran por competencias demostrables, no por antigüedad.</p></div>
+      <div class="pain-card fade"><span class="mono">Señal 03</span><p>Dirección solicita una fecha de cobertura y la respuesta es una estimación sin respaldo. El Radar aporta la cifra con la que sustentar esa conversación.</p></div>
     </div>
   </div>
 </section>
@@ -283,14 +290,14 @@
 <section>
   <div class="wrap">
     <p class="sec-label">El informe</p>
-    <h2>Cinco lecturas de radar. Cero humo.</h2>
+    <h2>Seis dimensiones de análisis. Metodología transparente.</h2>
     <div class="receives-grid">
-      <div class="rec-card fade"><span class="rec-num">R1</span><div><h3>Veredicto directo</h3><p>Un titular honesto sobre la viabilidad real de tu vacante. Si buscáis un unicornio con sueldo de poni, te lo diremos así.</p></div></div>
-      <div class="rec-card fade"><span class="rec-num">R2</span><div><h3>Benchmark salarial</h3><p>Rango de mercado real para ese puesto, sector y ciudad, y dónde cae tu oferta dentro de él.</p></div></div>
-      <div class="rec-card fade"><span class="rec-num">R3</span><div><h3>Tiempo de cobertura</h3><p>Semanas realistas hasta la firma, según escasez y atractivo de la oferta. El dato que dirección te va a pedir.</p></div></div>
-      <div class="rec-card fade"><span class="rec-num">R4</span><div><h3>Índice de escasez</h3><p>Cuántos profesionales con ese perfil hay en España y cuántos están dispuestos a moverse.</p></div></div>
-      <div class="rec-card fade"><span class="rec-num">R5</span><div><h3>Diagnóstico del JD + reescritura</h3><p>Puntuación de tu job description y una versión skills-based lista para copiar y publicar.</p></div></div>
-      <div class="rec-card fade"><span class="rec-num">+</span><div><h3>3 acciones concretas</h3><p>Qué tocar hoy (salario, requisitos, canal) para que la vacante deje de ser un pozo de tiempo.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">R1</span><div><h3>Conclusión ejecutiva</h3><p>Una valoración directa y fundamentada en datos sobre la viabilidad real de la posición.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">R2</span><div><h3>Benchmark salarial</h3><p>Rango de mercado para el puesto, sector y ubicación, contrastado con múltiples fuentes públicas y el criterio de weleapHUNT.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">R3</span><div><h3>Tiempo de cobertura</h3><p>Estimación de semanas hasta la incorporación, según disponibilidad de talento y atractivo de la propuesta.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">R4</span><div><h3>Índice de escasez de talento</h3><p>Estimación del volumen de profesionales con ese perfil en el mercado español y su predisposición a un cambio.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">R5</span><div><h3>Auditoría del job description</h3><p>Puntuación de la descripción del puesto y una reescritura basada en competencias, lista para publicar.</p></div></div>
+      <div class="rec-card fade"><span class="rec-num">+</span><div><h3>Plan de acción</h3><p>Palancas concretas — salario, requisitos, canal de captación — priorizadas por impacto.</p></div></div>
     </div>
   </div>
 </section>
@@ -299,8 +306,8 @@
 <section id="escanear">
   <div class="wrap">
     <p class="sec-label">Escáner</p>
-    <h2>Pon tu vacante bajo el radar.</h2>
-    <p class="sec-intro">Cuantos más datos, más afinada la lectura. El informe llega en menos de un minuto, aquí mismo.</p>
+    <h2>Analice esta posición.</h2>
+    <p class="sec-intro">Cuanta mayor sea la información aportada, mayor precisión tendrá el análisis. El informe se genera en menos de un minuto.</p>
 
     <div class="form-panel" id="panel-form">
       <form id="form-radar" novalidate>
@@ -343,7 +350,7 @@
           </div>
 
           <div class="form-error" id="form-error"></div>
-          <p class="form-note">Sin spam. Tu email nos sirve para verificar que eres un profesional de RRHH y, si nos dejas, contarte alguna lectura de mercado que merezca la pena. El informe lo tienes al instante en pantalla y puedes descargarlo en PDF.</p>
+          <p class="form-note">No se realiza envío de comunicaciones no solicitadas. Su email corporativo se utiliza para verificar su vinculación con un equipo de RRHH o dirección y, si lo autoriza, remitirle contenido de mercado relevante. El informe se muestra de inmediato en pantalla y puede descargarse en formato PDF.</p>
           <div class="form-submit"><button class="btn" type="submit" id="btn-enviar">Generar informe de radar</button></div>
         </div>
       </form>
@@ -392,7 +399,7 @@
           <div class="sal-labels"><span id="sal-min"></span><span id="sal-max"></span></div>
           <span class="sal-pos" id="sal-pos"></span>
           <p class="coment" id="sal-coment"></p>
-          <p class="coment mono" id="sal-fuentes" style="color:var(--accent);font-size:12.5px;margin-top:10px"></p>
+          <p class="coment mono" id="sal-fuentes" style="color:var(--muted-dark);font-size:12.5px;margin-top:10px;font-style:italic"></p>
         </div>
 
         <div class="icard">
@@ -433,18 +440,24 @@
         </div>
 
         <div class="icard full">
-          <h4>R6 · Comparativa internacional · ¿dónde es más fácil encontrar este perfil?</h4>
+          <h4>R6 · Comparativa internacional de disponibilidad de talento</h4>
           <div id="paises-lista"></div>
           <p class="coment" id="paises-conclusion" style="margin-top:16px"></p>
+        </div>
+
+        <div class="icard full metodologia">
+          <h4>Metodología y fuentes</h4>
+          <ol class="metodologia-fuentes" id="metodologia-fuentes"></ol>
+          <p class="metodologia-nota">Las estimaciones combinan datos públicos verificables, obtenidos mediante búsqueda en tiempo real, con el criterio de mercado propio de weleapHUNT, desarrollado a lo largo de más de 25 años de actividad en procesos de búsqueda ejecutiva en 8 países. El análisis se genera mediante inteligencia artificial aplicada a estas fuentes y está sujeto a validación humana en el marco de un proceso de selección real.</p>
         </div>
       </div>
 
       <div class="informe-cta">
-        <h3 id="cta-titulo">¿Quieres que lo encontremos nosotros?</h3>
-        <p>Este radar es lo que hacemos antes de aceptar cualquier búsqueda. Si el perfil es de los difíciles, mejor hablarlo con quien vive de encontrarlos.</p>
+        <h3 id="cta-titulo">¿Desea que gestionemos esta búsqueda?</h3>
+        <p>Este análisis es el mismo que weleap aplica antes de aceptar cualquier proceso de selección. Si el perfil presenta una cobertura compleja, conversemos.</p>
         <a class="btn-dark" href="mailto:sergio@weleapinternational.com?subject=Radar%20de%20Vacante%20—%20quiero%20hablar" id="cta-link">Hablar con weleap</a>
       </div>
-      <p class="disclaimer">Estimaciones generadas con IA a partir de conocimiento de mercado. Para datos verificados de candidatos reales, eso ya es trabajo de weleap.</p>
+      <p class="disclaimer">Estimaciones generadas mediante inteligencia artificial a partir de fuentes de mercado. La validación con candidatos reales forma parte del proceso de búsqueda ejecutiva de weleap.</p>
       <div style="text-align:center;margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
         <button class="btn" type="button" id="btn-otra-vacante" style="background:transparent;border:2px solid var(--accent);color:var(--accent)">Analizar otra vacante</button>
         <button class="btn" type="button" id="btn-descargar-pdf">Descargar informe en PDF</button>
@@ -456,21 +469,21 @@
 <!-- SECTION: faq -->
 <section>
   <div class="wrap">
-    <p class="sec-label">Dudas razonables</p>
-    <h2>Lo que nos preguntan antes de escanear.</h2>
-    <details class="faq-item"><summary>¿De verdad es gratis? ¿Cuál es la trampa?</summary><p>Es gratis. La "trampa" es transparente: si el informe te demuestra que sabemos leer tu mercado mejor que nadie, quizá nos llames cuando tengas una búsqueda difícil. Ese es el trato.</p></details>
-    <details class="faq-item"><summary>¿De dónde salen los datos salariales?</summary><p>El análisis combina IA de última generación con el criterio de mercado de weleap en los sectores donde operamos. Son estimaciones sólidas para tomar decisiones, no una nómina firmada. Para validación fina con candidatos reales, hablamos.</p></details>
-    <details class="faq-item"><summary>¿Qué hacéis con mi vacante y mi email?</summary><p>La vacante se usa solo para generar tu informe. El email, para enviarte el resultado y contenido de mercado ocasional del que te puedes borrar en un clic. No vendemos datos ni compartimos tu vacante con nadie.</p></details>
-    <details class="faq-item"><summary>¿Sirve para perfiles junior o solo directivos?</summary><p>Funciona para cualquier nivel, pero donde más brilla es en mid-senior y dirección en logística, ingeniería, energía, farma y data centers: nuestro terreno.</p></details>
-    <details class="faq-item"><summary>¿Puedo escanear varias vacantes?</summary><p>Sí. Y si tienes más de tres vacantes atascadas a la vez, el problema probablemente no son las vacantes. Escríbenos.</p></details>
+    <p class="sec-label">Preguntas frecuentes</p>
+    <h2>Información sobre el servicio.</h2>
+    <details class="faq-item"><summary>¿El servicio tiene coste?</summary><p>No. El análisis es gratuito. weleapHUNT lo ofrece como demostración de su criterio de mercado; si el resultado resulta de utilidad, quedamos a disposición para gestionar procesos de selección de mayor complejidad.</p></details>
+    <details class="faq-item"><summary>¿Cuál es la metodología de los datos salariales?</summary><p>El análisis combina inteligencia artificial con múltiples fuentes públicas de referencia y el criterio de mercado propio de weleapHUNT. El detalle de fuentes consultadas se muestra en cada informe, en la sección de metodología. Son estimaciones orientativas para la toma de decisiones, no cifras contractuales — para validación con candidatos reales, contamos con nuestro equipo de búsqueda.</p></details>
+    <details class="faq-item"><summary>¿Qué tratamiento reciben mis datos?</summary><p>La información de la vacante se utiliza exclusivamente para generar el informe. El email se emplea para remitir el resultado y, opcionalmente, contenido de mercado relevante, del que puede darse de baja en cualquier momento. No se comercializan datos ni se comparte la información con terceros.</p></details>
+    <details class="faq-item"><summary>¿Es aplicable a perfiles junior o solo a posiciones directivas?</summary><p>El servicio es aplicable a cualquier nivel de seniority, con especial precisión en posiciones de dirección y mandos intermedios en logística, ingeniería, energía, farmacéutica y data centers.</p></details>
+    <details class="faq-item"><summary>¿Es posible analizar varias posiciones?</summary><p>Sí, sin límite de posiciones distintas. Si gestiona un volumen elevado de procesos abiertos de forma simultánea, contacte con nuestro equipo para valorar un acompañamiento integral.</p></details>
   </div>
 </section>
 
 <!-- SECTION: cta final -->
 <section class="final-cta">
   <div class="wrap">
-    <h2>Publicar a ciegas también es una decisión.</h2>
-    <p>Solo que es la cara. Escanea tu vacante antes de quemarla en el mercado.</p>
+    <h2>Publicar sin validar el mercado también es una decisión.</h2>
+    <p>Y suele ser la más costosa. Analice la posición antes de exponerla al mercado.</p>
     <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
   </div>
 </section>
@@ -498,12 +511,12 @@ const FREE_MAIL = ['gmail.','hotmail.','outlook.','yahoo.','icloud.','proton.','
 const fmtEUR = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
 
 const MENSAJES_CARGA = [
-  'Iniciando barrido…',
-  'Cruzando benchmark salarial del sector…',
-  'Midiendo escasez del perfil en España…',
-  'Estimando tiempo de cobertura…',
-  'Diagnosticando tu job description…',
-  'Redactando el veredicto (sin anestesia)…'
+  'Iniciando el análisis…',
+  'Contrastando benchmark salarial del sector…',
+  'Evaluando disponibilidad de talento en España…',
+  'Estimando el plazo de cobertura…',
+  'Auditando la descripción del puesto…',
+  'Elaborando la conclusión ejecutiva…'
 ];
 
 // ---- envío ----
@@ -526,12 +539,12 @@ $('form-radar').addEventListener('submit', async e => {
 
   // validación
   for (const k of ['puesto','sector','ubicacion','empresa','nombre','email']) {
-    if (!datos[k]) { err.textContent = 'Completa los campos marcados con * para lanzar el radar.'; err.style.display = 'block'; $(k).focus(); return; }
+    if (!datos[k]) { err.textContent = 'Complete los campos obligatorios (*) para generar el análisis.'; err.style.display = 'block'; $(k).focus(); return; }
   }
   const dominio = (datos.email.split('@')[1] || '').toLowerCase();
-  if (!dominio.includes('.')) { err.textContent = 'Ese email no parece válido.'; err.style.display = 'block'; return; }
+  if (!dominio.includes('.')) { err.textContent = 'La dirección de email introducida no es válida.'; err.style.display = 'block'; return; }
   if (FREE_MAIL.some(f => dominio.startsWith(f))) {
-    err.textContent = 'Necesitamos tu email corporativo: el radar está pensado para equipos de talento y dirección, no para curiosos con Gmail.';
+    err.textContent = 'Este servicio está reservado a equipos de talento y dirección: introduzca su email corporativo.';
     err.style.display = 'block'; return;
   }
 
@@ -583,7 +596,7 @@ function renderInforme(inf, datos, esEjemplo) {
   const nivel = ['verde','ambar','rojo'].includes(v.nivel) ? v.nivel : 'ambar';
   const ver = $('veredicto');
   ver.className = 'veredicto ' + nivel;
-  $('ver-tag').textContent = 'VEREDICTO · ' + ({verde:'VÍA LIBRE',ambar:'CON RESERVAS',rojo:'ALERTA'})[nivel];
+  $('ver-tag').textContent = 'CONCLUSIÓN EJECUTIVA · ' + ({verde:'VIABLE',ambar:'VIABLE CON AJUSTES',rojo:'RIESGO ELEVADO'})[nivel];
   $('ver-titular').textContent = v.titular || '';
   $('ver-texto').textContent = v.texto || '';
 
@@ -619,14 +632,14 @@ function renderInforme(inf, datos, esEjemplo) {
       m.style.left = Math.min(99, Math.max(1, (oferta-lo)/span*100)) + '%';
     }
   }
-  const posTxt = {por_debajo:'▼ Tu oferta está por debajo de mercado', en_linea:'● Tu oferta está en línea con el mercado', por_encima:'▲ Tu oferta está por encima de mercado', no_indicado:'Sin salario indicado — eso ya es un problema'};
+  const posTxt = {por_debajo:'▼ La oferta se sitúa por debajo de mercado', en_linea:'● La oferta está en línea con el mercado', por_encima:'▲ La oferta se sitúa por encima de mercado', no_indicado:'Banda salarial no indicada'};
   const pos = b.posicion_oferta in posTxt ? b.posicion_oferta : 'no_indicado';
   const posEl = $('sal-pos');
   posEl.className = 'sal-pos ' + pos;
   posEl.textContent = posTxt[pos];
   $('sal-coment').textContent = b.comentario || '';
   const fuentes = Array.isArray(b.fuentes_consultadas) ? b.fuentes_consultadas.filter(Boolean) : [];
-  $('sal-fuentes').textContent = fuentes.length ? 'Fuentes cruzadas: ' + fuentes.join(' · ') + ' — combinado con el criterio de mercado de weleapHUNT' : '';
+  $('sal-fuentes').textContent = fuentes.length ? `${fuentes.length} fuentes contrastadas — ver metodología completa al final del informe` : '';
 
   // escasez
   const es = inf.escasez_talento || {};
@@ -637,7 +650,7 @@ function renderInforme(inf, datos, esEjemplo) {
   requestAnimationFrame(()=>{ arc.style.transition='stroke-dashoffset 1.2s ease'; arc.style.strokeDashoffset = 138 - (138*idx/100); });
   $('gauge-num').textContent = idx;
   const nivEl = $('esc-nivel');
-  nivEl.textContent = 'Escasez ' + (es.nivel||'—');
+  nivEl.textContent = 'Escasez: ' + (es.nivel||'—');
   nivEl.style.color = color;
   $('esc-candidatos').textContent = es.candidatos_estimados || '';
   $('esc-coment').textContent = es.comentario || '';
@@ -675,6 +688,11 @@ function renderInforme(inf, datos, esEjemplo) {
   }).join('');
   $('paises-conclusion').textContent = comp.conclusion || '';
 
+  // metodología y fuentes
+  $('metodologia-fuentes').innerHTML = fuentes.length
+    ? fuentes.map(f => `<li>${escapeHTML(f)}</li>`).join('')
+    : '<li>Criterio de mercado de weleapHUNT, sin fuentes públicas adicionales verificadas para este perfil.</li>';
+
   // CTA personalizado
   $('cta-link').href = `mailto:sergio@weleapinternational.com?subject=${encodeURIComponent('Radar de Vacante — '+datos.puesto)}&body=${encodeURIComponent('Hola weleap,\n\nAcabo de escanear la vacante "'+datos.puesto+'" ('+datos.ubicacion+') y quiero hablar sobre la búsqueda.\n\n'+datos.nombre+' — '+datos.empresa)}`;
 
@@ -688,47 +706,47 @@ function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<
 // ---- informe de ejemplo (100% estático, no gasta ningún análisis real) ----
 const INFORME_EJEMPLO = {
   veredicto: {
-    titular: "Buscáis un unicornio con sueldo de poni",
-    texto: "El salario ofrecido está un 18% por debajo de la media de mercado para este perfil, y encima pedís bilingüismo + 8 años de experiencia muy específica. Con estas condiciones, los mejores candidatos ni van a aplicar.",
+    titular: "El perfil solicitado presenta escasez alta y una banda salarial no competitiva",
+    texto: "El salario ofrecido se sitúa un 18% por debajo de la media de mercado para este perfil, con requisitos de bilingüismo y 8 años de experiencia muy específica. En estas condiciones, la conversión de candidatos senior será limitada.",
     nivel: "rojo",
   },
   benchmark_salarial: {
     rango_mercado_min: 65000, rango_mercado_max: 85000, posicion_oferta: "por_debajo",
-    comentario: "La oferta de 58.000€ queda claramente por debajo del rango de mercado para un perfil senior de este sector en Madrid.",
+    comentario: "La oferta de 58.000€ se sitúa por debajo del rango de mercado para un perfil senior de este sector en Madrid.",
     fuentes_consultadas: ["INE Encuesta de Estructura Salarial", "Hays Guía del Mercado Laboral 2026", "Michael Page Estudio de Remuneración 2026"],
   },
-  tiempo_cobertura: { semanas_min: 12, semanas_max: 20, comentario: "Con un salario por debajo de mercado y requisitos tan específicos, el proceso previsiblemente superará los 4 meses." },
-  escasez_talento: { indice: 78, nivel: "alta", candidatos_estimados: "100-150 profesionales en España, menos del 8% en búsqueda activa", comentario: "Perfil muy escaso: la combinación de sector, idioma y seniority reduce muchísimo el pool real." },
+  tiempo_cobertura: { semanas_min: 12, semanas_max: 20, comentario: "Con un salario por debajo de mercado y requisitos de alta especificidad, el proceso previsiblemente superará los 4 meses." },
+  escasez_talento: { indice: 78, nivel: "alta", candidatos_estimados: "100-150 profesionales en España, menos del 8% en búsqueda activa", comentario: "Perfil de alta escasez: la combinación de sector, idioma y seniority reduce sensiblemente el pool disponible." },
   diagnostico_jd: {
     puntuacion: 4, jd_aportado: true,
     problemas: [
-      "Lista de 14 requisitos, varios de ellos poco realistas combinados entre sí",
-      "No se menciona rango salarial ni beneficios, lo que reduce la conversión de candidatos pasivos",
-      "Jerga interna de la empresa sin explicar, dificulta que un candidato externo entienda el rol real",
+      "La oferta enumera 14 requisitos, varios de ellos de difícil combinación en un mismo perfil",
+      "No se indica banda salarial ni beneficios, lo que reduce la conversión de candidatos pasivos",
+      "Se emplea terminología interna de la organización sin contextualizar, lo que dificulta la comprensión del rol a candidatos externos",
     ],
-    version_mejorada: "Director/a de Operaciones (España)\n\nLo que debes poder demostrar:\n- Experiencia liderando equipos de operaciones de 20+ personas\n- Track record de mejora de eficiencia en entornos industriales\n- Inglés profesional (no obligatorio nativo)\n\nLo que ofrecemos: 70.000-80.000€ + variable, coche de empresa, plan de carrera.",
-    comentario: "Reescritura skills-based que amplía el pool sin bajar el nivel real exigido.",
+    version_mejorada: "Director/a de Operaciones (España)\n\nCompetencias requeridas:\n- Experiencia liderando equipos de operaciones de 20+ personas\n- Trayectoria acreditada en mejora de eficiencia en entornos industriales\n- Inglés profesional (no se exige nivel nativo)\n\nCondiciones: 70.000-80.000€ + retribución variable, vehículo de empresa, plan de desarrollo profesional.",
+    comentario: "Reescritura basada en competencias que amplía el pool de candidatos sin reducir el nivel de exigencia.",
   },
   recomendaciones: [
-    "Subir el salario a la banda 70.000-80.000€ o el proceso se alargará más de 4 meses",
-    "Quitar el requisito de idioma nativo — inglés profesional es suficiente y triplica el pool",
-    "Publicar el rango salarial en la oferta: sube la tasa de aplicación de candidatos senior un 30-40%",
+    "Ajustar el salario a la banda 70.000-80.000€ para evitar que el proceso supere los 4 meses",
+    "Flexibilizar el requisito de idioma nativo — un nivel profesional de inglés triplica el pool disponible",
+    "Incluir la banda salarial en la oferta: incrementa la tasa de aplicación de candidatos senior entre un 30-40%",
   ],
   riesgo_legal: {
     nivel: "riesgo_medio",
     problemas: [
-      "El JD pide 'última nómina' al candidato — prohibido desde el 7 de junio de 2026 por la Directiva (UE) 2023/970",
+      "La oferta solicita la última nómina del candidato — prohibido desde el 7 de junio de 2026 por la Directiva (UE) 2023/970",
     ],
-    comentario: "Solo el 23% de las empresas españolas están preparadas para esta directiva — no sois un caso aislado, pero conviene corregirlo antes de la siguiente entrevista.",
+    comentario: "Solo el 23% de las empresas españolas están preparadas para esta directiva. Se recomienda corregir este punto antes de la siguiente entrevista.",
   },
   comparativa_internacional: {
     paises: [
-      { pais: "España", indice_disponibilidad: 22, nivel: "dificil", comentario: "Pool reducido y muy disputado entre las principales consultoras." },
-      { pais: "Portugal", indice_disponibilidad: 38, nivel: "media", comentario: "Más disponibilidad, salarios más bajos atraen talento español." },
-      { pais: "Polonia", indice_disponibilidad: 61, nivel: "media", comentario: "Hub industrial europeo con buena disponibilidad de perfiles similares." },
-      { pais: "México", indice_disponibilidad: 55, nivel: "media", comentario: "Creciente oferta de perfiles bilingües por nearshoring." },
+      { pais: "España", indice_disponibilidad: 22, nivel: "dificil", comentario: "Pool reducido y alta competencia entre las principales firmas de búsqueda." },
+      { pais: "Portugal", indice_disponibilidad: 38, nivel: "media", comentario: "Mayor disponibilidad; las condiciones salariales atraen talento procedente de España." },
+      { pais: "Polonia", indice_disponibilidad: 61, nivel: "media", comentario: "Hub industrial europeo con buena disponibilidad de perfiles equivalentes." },
+      { pais: "México", indice_disponibilidad: 55, nivel: "media", comentario: "Oferta creciente de perfiles bilingües impulsada por el nearshoring." },
     ],
-    conclusion: "Si el cliente está abierto a modelo híbrido o remoto, Polonia y México ofrecen bastante más disponibilidad que España al mismo presupuesto.",
+    conclusion: "Si la organización está abierta a un modelo híbrido o remoto, Polonia y México ofrecen una disponibilidad de talento sensiblemente mayor que España a un presupuesto equivalente.",
   },
   email_personalizado: { asunto: "Ejemplo", cuerpo: "Este es un email de ejemplo." },
 };
@@ -869,7 +887,7 @@ function generarPDF(inf, datos) {
   }
   parrafo(b.comentario || '', { espacio: 2 });
   if (Array.isArray(b.fuentes_consultadas) && b.fuentes_consultadas.length) {
-    parrafo('Fuentes cruzadas: ' + b.fuentes_consultadas.join(' · ') + ' — combinado con el criterio de mercado de weleapHUNT', { size: 8.5, color: ACCENT, espacio: 6 });
+    parrafo('Fuentes contrastadas: ver metodología al final del informe.', { size: 8.5, color: GRIS, espacio: 6 });
   }
 
   // Tiempo de cobertura
@@ -908,7 +926,7 @@ function generarPDF(inf, datos) {
   const comp = inf.comparativa_internacional || {};
   const paisesPdf = Array.isArray(comp.paises) ? comp.paises : [];
   if (paisesPdf.length) {
-    titulo('Comparativa internacional: dónde es más fácil encontrar este perfil');
+    titulo('Comparativa internacional de disponibilidad de talento');
     const nivelColorPdf = { facil: [47,191,113], media: [255,176,32], dificil: [230,57,80], muy_dificil: [230,57,80] };
     paisesPdf.forEach(p => {
       const idx = Math.max(0, Math.min(100, Number(p.indice_disponibilidad) || 0));
@@ -936,6 +954,15 @@ function generarPDF(inf, datos) {
     }
   }
 
+  // Metodología y fuentes
+  titulo('Metodología y fuentes');
+  const fuentesPdf = Array.isArray(b.fuentes_consultadas) ? b.fuentes_consultadas : [];
+  if (fuentesPdf.length) {
+    fuentesPdf.forEach((f, i) => parrafo(`${i + 1}. ${f}`, { size: 9, espacio: 2 }));
+    y += 2;
+  }
+  parrafo('Las estimaciones combinan datos públicos verificables, obtenidos mediante búsqueda en tiempo real, con el criterio de mercado propio de weleapHUNT, desarrollado a lo largo de más de 25 años de actividad en procesos de búsqueda ejecutiva en 8 países. El análisis se genera mediante inteligencia artificial aplicada a estas fuentes y está sujeto a validación humana en el marco de un proceso de selección real.', { size: 8.5, espacio: 6 });
+
   // Pie
   salto(16);
   y += 4;
@@ -944,7 +971,7 @@ function generarPDF(inf, datos) {
   y += 6;
   doc.setFont('helvetica','normal'); doc.setFontSize(8);
   doc.setTextColor(...GRIS);
-  doc.text('Estimaciones generadas con IA a partir de fuentes públicas y criterio de weleapHUNT. Para datos verificados de candidatos reales, contacta con sergio@weleapinternational.com', MARGIN, y, { maxWidth: COL_W });
+  doc.text('Informe elaborado por weleapHUNT. Para la validación de candidatos reales, contacte con sergio@weleapinternational.com', MARGIN, y, { maxWidth: COL_W });
 
   const nombreArchivo = 'radar-vacante-' + (datos.puesto || 'informe').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '.pdf';
   doc.save(nombreArchivo);
