@@ -262,8 +262,8 @@
   </div>
   <div class="wrap hero-content">
     <div class="eyebrow">Herramienta gratuita · weleapHUNT executive search</div>
-    <h1>Valide la viabilidad de su búsqueda <em>antes de publicarla</em>.</h1>
-    <p class="hero-sub">Introduzca los datos de la posición y obtenga, en menos de un minuto, el análisis que un consultor senior de executive search entregaría tras una semana de trabajo: benchmarking salarial, tiempo estimado de cobertura, disponibilidad real de talento y una auditoría completa de la descripción del puesto.</p>
+    <h1>Valida la viabilidad de tu búsqueda <em>antes de publicarla</em>.</h1>
+    <p class="hero-sub">Introduce los datos de la posición y obtén, en menos de un minuto, el análisis que un consultor senior de executive search entregaría tras una semana de trabajo: benchmarking salarial, tiempo estimado de cobertura, disponibilidad real de talento y una auditoría completa de la descripción del puesto.</p>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
       <button type="button" id="btn-ver-ejemplo" class="btn" style="background:transparent;border:2px solid rgba(255,255,255,.3);color:#fff">Ver un ejemplo primero</button>
@@ -306,7 +306,7 @@
 <section id="escanear">
   <div class="wrap">
     <p class="sec-label">Escáner</p>
-    <h2>Analice esta posición.</h2>
+    <h2>Analiza esta posición.</h2>
     <p class="sec-intro">Cuanta mayor sea la información aportada, mayor precisión tendrá el análisis. El informe se genera en menos de un minuto.</p>
 
     <div class="form-panel" id="panel-form">
@@ -350,7 +350,7 @@
           </div>
 
           <div class="form-error" id="form-error"></div>
-          <p class="form-note">No se realiza envío de comunicaciones no solicitadas. Su email corporativo se utiliza para verificar su vinculación con un equipo de RRHH o dirección y, si lo autoriza, remitirle contenido de mercado relevante. El informe se muestra de inmediato en pantalla y puede descargarse en formato PDF.</p>
+          <p class="form-note">Sin spam. Tu email corporativo se utiliza para verificar tu vinculación con un equipo de RRHH o dirección y, si lo autorizas, recibir contenido de mercado relevante. El informe se muestra al instante en pantalla y puedes descargarlo en PDF.</p>
           <div class="form-submit"><button class="btn" type="submit" id="btn-enviar">Generar informe de radar</button></div>
         </div>
       </form>
@@ -453,7 +453,7 @@
       </div>
 
       <div class="informe-cta">
-        <h3 id="cta-titulo">¿Desea que gestionemos esta búsqueda?</h3>
+        <h3 id="cta-titulo">¿Quieres que gestionemos esta búsqueda?</h3>
         <p>Este análisis es el mismo que weleap aplica antes de aceptar cualquier proceso de selección. Si el perfil presenta una cobertura compleja, conversemos.</p>
         <a class="btn-dark" href="mailto:sergio@weleapinternational.com?subject=Radar%20de%20Vacante%20—%20quiero%20hablar" id="cta-link">Hablar con weleap</a>
       </div>
@@ -475,7 +475,7 @@
     <details class="faq-item"><summary>¿Cuál es la metodología de los datos salariales?</summary><p>El análisis combina inteligencia artificial con múltiples fuentes públicas de referencia y el criterio de mercado propio de weleapHUNT. El detalle de fuentes consultadas se muestra en cada informe, en la sección de metodología. Son estimaciones orientativas para la toma de decisiones, no cifras contractuales — para validación con candidatos reales, contamos con nuestro equipo de búsqueda.</p></details>
     <details class="faq-item"><summary>¿Qué tratamiento reciben mis datos?</summary><p>La información de la vacante se utiliza exclusivamente para generar el informe. El email se emplea para remitir el resultado y, opcionalmente, contenido de mercado relevante, del que puede darse de baja en cualquier momento. No se comercializan datos ni se comparte la información con terceros.</p></details>
     <details class="faq-item"><summary>¿Es aplicable a perfiles junior o solo a posiciones directivas?</summary><p>El servicio es aplicable a cualquier nivel de seniority, con especial precisión en posiciones de dirección y mandos intermedios en logística, ingeniería, energía, farmacéutica y data centers.</p></details>
-    <details class="faq-item"><summary>¿Es posible analizar varias posiciones?</summary><p>Sí, sin límite de posiciones distintas. Si gestiona un volumen elevado de procesos abiertos de forma simultánea, contacte con nuestro equipo para valorar un acompañamiento integral.</p></details>
+    <details class="faq-item"><summary>¿Es posible analizar varias posiciones?</summary><p>Sí, sin límite de posiciones distintas. Si gestionas un volumen elevado de procesos abiertos de forma simultánea, contacta con nuestro equipo para valorar un acompañamiento integral.</p></details>
   </div>
 </section>
 
@@ -483,7 +483,7 @@
 <section class="final-cta">
   <div class="wrap">
     <h2>Publicar sin validar el mercado también es una decisión.</h2>
-    <p>Y suele ser la más costosa. Analice la posición antes de exponerla al mercado.</p>
+    <p>Y suele ser la más costosa. Analiza la posición antes de exponerla al mercado.</p>
     <a class="btn" href="#escanear">Escanear mi vacante gratis</a>
   </div>
 </section>
@@ -539,12 +539,12 @@ $('form-radar').addEventListener('submit', async e => {
 
   // validación
   for (const k of ['puesto','sector','ubicacion','empresa','nombre','email']) {
-    if (!datos[k]) { err.textContent = 'Complete los campos obligatorios (*) para generar el análisis.'; err.style.display = 'block'; $(k).focus(); return; }
+    if (!datos[k]) { err.textContent = 'Completa los campos obligatorios (*) para generar el análisis.'; err.style.display = 'block'; $(k).focus(); return; }
   }
   const dominio = (datos.email.split('@')[1] || '').toLowerCase();
-  if (!dominio.includes('.')) { err.textContent = 'La dirección de email introducida no es válida.'; err.style.display = 'block'; return; }
+  if (!dominio.includes('.')) { err.textContent = 'El email introducido no es válido.'; err.style.display = 'block'; return; }
   if (FREE_MAIL.some(f => dominio.startsWith(f))) {
-    err.textContent = 'Este servicio está reservado a equipos de talento y dirección: introduzca su email corporativo.';
+    err.textContent = 'Este servicio está reservado a equipos de talento y dirección: introduce tu email corporativo.';
     err.style.display = 'block'; return;
   }
 
@@ -713,7 +713,7 @@ const INFORME_EJEMPLO = {
   benchmark_salarial: {
     rango_mercado_min: 65000, rango_mercado_max: 85000, posicion_oferta: "por_debajo",
     comentario: "La oferta de 58.000€ se sitúa por debajo del rango de mercado para un perfil senior de este sector en Madrid.",
-    fuentes_consultadas: ["INE Encuesta de Estructura Salarial", "Hays Guía del Mercado Laboral 2026", "Michael Page Estudio de Remuneración 2026"],
+    fuentes_consultadas: ["INE Encuesta de Estructura Salarial", "Hays Guía del Mercado Laboral 2026", "Michael Page Estudio de Remuneración 2026", "Criterio de mercado weleapHUNT (25+ años de experiencia en executive search, presencia en 8 países)"],
   },
   tiempo_cobertura: { semanas_min: 12, semanas_max: 20, comentario: "Con un salario por debajo de mercado y requisitos de alta especificidad, el proceso previsiblemente superará los 4 meses." },
   escasez_talento: { indice: 78, nivel: "alta", candidatos_estimados: "100-150 profesionales en España, menos del 8% en búsqueda activa", comentario: "Perfil de alta escasez: la combinación de sector, idioma y seniority reduce sensiblemente el pool disponible." },
@@ -971,7 +971,7 @@ function generarPDF(inf, datos) {
   y += 6;
   doc.setFont('helvetica','normal'); doc.setFontSize(8);
   doc.setTextColor(...GRIS);
-  doc.text('Informe elaborado por weleapHUNT. Para la validación de candidatos reales, contacte con sergio@weleapinternational.com', MARGIN, y, { maxWidth: COL_W });
+  doc.text('Informe elaborado por weleapHUNT. Para la validación de candidatos reales, contacta con sergio@weleapinternational.com', MARGIN, y, { maxWidth: COL_W });
 
   const nombreArchivo = 'radar-vacante-' + (datos.puesto || 'informe').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '.pdf';
   doc.save(nombreArchivo);
