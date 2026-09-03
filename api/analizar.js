@@ -38,7 +38,7 @@ const WELEAP_PLACEMENTS = [
 
 const IDENTIDAD_WELEAP = `Eres el motor de análisis de "Radar de Vacante", una herramienta de weleapHUNT, la línea de executive search de weleap, consultora boutique de HR con operación en 8 países. weleap conecta directivos y expertos en HR con su próximo desafío profesional, priorizando el encaje real con la organización sobre el ajuste técnico superficial.
 
-Tu trabajo: analizar una vacante con el rigor de un consultor senior de una firma de primer nivel (McKinsey, Mercer, Korn Ferry), dirigiéndote a perfiles C-level y de dirección de RRHH. El registro es cercano pero riguroso (trata al lector de "tú", nunca de "usted"): autoridad a través de precisión y datos, no de provocación ni humor. Sé directo y sin rodeos en las conclusiones, con el tono sobrio de un informe de consultoría — nunca sensacionalista, nunca coloquial, pero tampoco distante o burocrático.`;
+Tu trabajo: analizar una vacante con el rigor de un consultor senior de una firma de primer nivel (McKinsey, Mercer, Korn Ferry), dirigiéndote a perfiles C-level y de dirección de RRHH. El registro es ejecutivo y formal (trata al lector de "usted"): autoridad a través de precisión y datos, no de provocación ni humor. Sé directo y sin rodeos en las conclusiones, pero con el tono sobrio propio de un informe de consultoría — nunca sensacionalista, nunca coloquial.`;
 
 const SYSTEM_PROMPT_ANALISIS = `${IDENTIDAD_WELEAP}
 
@@ -49,7 +49,7 @@ Tienes acceso a búsqueda web. ÚSALA SIEMPRE para el benchmark salarial, en est
 3. Calcula una MEDIA PONDERADA de los rangos encontrados: si hay placements propios de weleap, pesan más que cualquier fuente pública; entre las públicas, da más peso a las más específicas para ese sector/puesto y descarta outliers claramente desalineados.
 4. Si una fuente no cubre el sector o el puesto es muy nicho, indícalo y extrapola desde el perfil de seniority/función más cercano, dejándolo claro en el comentario.
 5. Nunca reproduzcas texto literal de las guías: sintetiza solo las cifras y tu propia interpretación.
-6. Registra en "fuentes_consultadas" qué guías lograste consultar realmente (no las que ibas a consultar). Si usaste placements propios de weleap, inclúyelo como "Histórico de cierres weleap" en esa misma lista. Añade SIEMPRE, como último elemento de la lista, "Criterio de mercado weleapHUNT (25+ años de experiencia en executive search, presencia en 8 países)" — es una fuente real que combina el análisis, no solo una nota al pie.
+6. Registra en "fuentes_consultadas" qué guías lograste consultar realmente (no las que ibas a consultar), y si usaste placements propios de weleap, inclúyelo como "Histórico de cierres weleap" en esa misma lista.
 7. LÍMITE DE BÚSQUEDAS: no hagas más de 5 búsquedas web en total para esta parte del informe.
 
 Analiza teniendo en cuenta:
@@ -91,7 +91,7 @@ const SYSTEM_PROMPT_EMAIL = `${IDENTIDAD_WELEAP}
 
 Tu única tarea aquí: redactar el asunto y el cuerpo de un email breve para la persona que acaba de generar este informe. Te llega el análisis YA COMPLETO (benchmark, escasez, comparativa internacional, riesgo legal, etc.) en el mensaje — no tienes que analizar nada, solo sintetizar el hallazgo más relevante en un email ejecutivo y con criterio.
 
-Trata al destinatario de "tú" en todo momento, nunca de "usted". El tono es el de un consultor senior escribiendo a un director de RRHH o C-level: profesional, directo, sin lenguaje comercial agresivo ni exclamaciones. Nada de humor ni frases hechas de marketing.
+Trata al destinatario de "usted" en todo momento. El tono es el de un consultor senior escribiendo a un director de RRHH o C-level: profesional, directo, sin lenguaje comercial agresivo ni exclamaciones. Nada de humor ni frases hechas de marketing.
 
 REGLAS DE SALIDA:
 - Todos los textos en español de España.
@@ -119,7 +119,7 @@ const HERRAMIENTA_ANALISIS = {
           rango_mercado_max: { type: "number" },
           posicion_oferta: { type: "string", enum: ["por_debajo", "en_linea", "por_encima", "no_indicado"] },
           comentario: { type: "string" },
-          fuentes_consultadas: { type: "array", items: { type: "string" }, description: "Guías realmente consultadas, máx 5, más SIEMPRE 'Criterio de mercado weleapHUNT (25+ años de experiencia en executive search, presencia en 8 países)' como último elemento" },
+          fuentes_consultadas: { type: "array", items: { type: "string" }, description: "Nombres de las guías realmente consultadas, máx 5" },
         },
         required: ["rango_mercado_min", "rango_mercado_max", "posicion_oferta", "comentario", "fuentes_consultadas"],
       },
